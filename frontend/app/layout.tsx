@@ -1,16 +1,14 @@
-"use client"
-
+// Import Next.js metadata type for static site metadata
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { ClientWeb3Provider } from '@/components/ClientWeb3Provider'
-import { useEffect } from 'react'
-import { sdk } from '@farcaster/miniapp-sdk'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'BlockIQ - Blockchain IQ Quiz',
   description: 'Test your blockchain IQ and pay to see your score! Challenge yourself with questions about Base, EVM, and general blockchain knowledge.',
+  // Used for generating absolute URLs in meta tags
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.blockiq.xyz'),
   openGraph: {
     title: 'BlockIQ Quiz',
@@ -19,7 +17,7 @@ export const metadata: Metadata = {
     siteName: 'BlockIQ Quiz',
     images: [
       {
-        url: '/BlockIQ.png',
+        url: '/BlockIQ.png', // Social preview image
         width: 512,
         height: 512,
         alt: 'BlockIQ Logo',
@@ -39,6 +37,7 @@ export const metadata: Metadata = {
     'fc:frame:button:1:action': 'link',
     'fc:frame:button:1:target': '/',
     'farcaster:manifest': '/.well-known/farcaster.json',
+    // Mobile optimization for Farcaster
     'viewport': 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
@@ -46,17 +45,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    sdk.actions.ready()
-      .then(() => {
-        console.log('✅ Farcaster ready() called from layout')
-      })
-      .catch((e) => {
-        console.error('❌ Failed to call sdk.actions.ready()', e)
-      })
-  }, [])
 
+// ---
+// RootLayout: wraps all pages, sets up fonts, global styles, and Web3 context
+// ---
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
     <html lang="en">
       <head>
@@ -70,6 +67,7 @@ html {
         `}</style>
       </head>
       <body>
+        {/* Web3Provider gives access to wallet connection and blockchain features throughout the app */}
         <ClientWeb3Provider>
           {children}
         </ClientWeb3Provider>
