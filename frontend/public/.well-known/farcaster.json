@@ -1,0 +1,13 @@
+{
+  "name": "BlockIQ",
+  "description": "Your Mini App Description",
+  "url": "https://www.blockiq.xyz/",
+  "icons": [
+    {
+      "src": "https://www.blockiq.xyz/BlockIQ.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "sdk_version": "1.0.0"
+}

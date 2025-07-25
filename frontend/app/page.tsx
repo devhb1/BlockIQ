@@ -1285,13 +1285,14 @@ export default function BlockchainIQQuiz() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
-  // Farcaster SDK initialization
+  // Farcaster Mini App SDK: Notify Farcaster that the app is ready (removes splash)
   useEffect(() => {
-    if (isFarcasterMiniApp()) {
-      // Notify Farcaster that the mini app is ready
-      if (typeof window !== 'undefined' && window.parent) {
-        window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
-      }
+    // If running inside Farcaster Mini App, call sdk.actions.ready()
+    if (typeof window !== 'undefined' && window.parent) {
+      // If you use @farcaster/devkit, import sdk and call sdk.actions.ready()
+      // import { sdk } from '@farcaster/devkit';
+      // sdk.actions.ready();
+      window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
     }
   }, [])
 
