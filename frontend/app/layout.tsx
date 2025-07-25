@@ -1,11 +1,11 @@
-// Import Next.js metadata type
+// app/layout.tsx
 import type { Metadata } from "next";
 
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 
 import { ClientWeb3Provider } from "@/components/ClientWeb3Provider";
-import FarcasterReady from "@/components/FarcasterReady";
+import FarcasterReady from "../components/FarcasterReady"
 
 import "./globals.css";
 
@@ -16,7 +16,9 @@ export const metadata: Metadata = {
   title: "BlockIQ - Blockchain IQ Quiz",
   description:
     "Test your blockchain IQ and pay to see your score! Challenge yourself with questions about Base, EVM, and general blockchain knowledge.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.blockiq.xyz"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.blockiq.xyz"
+  ),
   openGraph: {
     title: "BlockIQ Quiz",
     description: "Test your blockchain IQ and pay to see your score!",
@@ -38,12 +40,14 @@ export const metadata: Metadata = {
     images: ["/BlockIQ.png"],
   },
   other: {
+    // Farcaster frame metadata
     "fc:frame": "vNext",
     "fc:frame:image": "/BlockIQ.png",
     "fc:frame:button:1": "Start Quiz",
     "fc:frame:button:1:action": "link",
     "fc:frame:button:1:target": "/",
     "farcaster:manifest": "/.well-known/farcaster.json",
+    // Mobile viewport and PWA hints
     viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover",
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
@@ -60,7 +64,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Ensure responsive viewport */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* Inject Geist font CSS variables */}
         <style>{`
           html {
             font-family: ${GeistSans.style.fontFamily};
@@ -71,7 +77,8 @@ export default function RootLayout({
       </head>
       <body>
         <ClientWeb3Provider>
-          <FarcasterReady /> {/* 🚀 one ready() per page load */}
+          {/* This component calls await sdk.actions.ready() once per page load */}
+          <FarcasterReady>{null}</FarcasterReady>
           {children}
         </ClientWeb3Provider>
       </body>
