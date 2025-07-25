@@ -8,7 +8,6 @@ import './globals.css'
 
 // App-wide metadata for SEO, social sharing, and Farcaster integration
 export const metadata: Metadata = {
- 
   title: 'BlockIQ - Blockchain IQ Quiz',
   description: 'Test your blockchain IQ and pay to see your score! Challenge yourself with questions about Base, EVM, and general blockchain knowledge.',
   // Used for generating absolute URLs in meta tags
@@ -21,18 +20,34 @@ export const metadata: Metadata = {
     siteName: 'BlockIQ Quiz',
     images: [
       {
-        url: '/images/BlockIQ.png', // Social preview image
-        width: 800,
-        height: 600,
+        url: '/BlockIQ.png', // Social preview image
+        width: 512,
+        height: 512,
         alt: 'BlockIQ Logo',
       },
     ],
   },
-  // Custom meta tags for Farcaster Frames integration
+  // Twitter Card metadata
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BlockIQ Quiz',
+    description: 'Test your blockchain IQ and pay to see your score!',
+    images: ['/BlockIQ.png'],
+  },
+  // Farcaster Mini App and Frame integration metadata
   other: {
     'fc:frame': 'vNext',
-    'fc:frame:image': '/images/BlockIQ.png',
+    'fc:frame:image': '/BlockIQ.png',
     'fc:frame:button:1': 'Start Quiz',
+    'fc:frame:button:1:action': 'link',
+    'fc:frame:button:1:target': '/',
+    // Farcaster Mini App manifest
+    'farcaster:manifest': '/.well-known/farcaster.json',
+    // Mobile optimization for Farcaster
+    'viewport': 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
   },
 }
 

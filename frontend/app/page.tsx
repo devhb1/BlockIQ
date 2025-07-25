@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye } from "lucide-react"
+import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye, Trophy } from "lucide-react"
 import PayToSeeScore from "@/components/PayToSeeScore"
 import ScoreDisplay from "@/components/ScoreDisplay"
 
@@ -1285,14 +1286,50 @@ export default function BlockchainIQQuiz() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
-  // Farcaster Mini App SDK: Notify Farcaster that the app is ready (removes splash)
+  // Enhanced Farcaster Mini App integration with error handling
   useEffect(() => {
-    // If running inside Farcaster Mini App, call sdk.actions.ready()
-    if (typeof window !== 'undefined' && window.parent) {
-      // If you use @farcaster/devkit, import sdk and call sdk.actions.ready()
-      // import { sdk } from '@farcaster/devkit';
-      // sdk.actions.ready();
-      window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+    // Check if running inside Farcaster Mini App environment
+    if (typeof window !== 'undefined') {
+      const isFarcasterMiniApp = window.parent !== window || 
+                                window.location !== window.parent.location ||
+                                document.referrer.includes('farcaster') ||
+                                window.navigator.userAgent.includes('Farcaster')
+      
+      if (isFarcasterMiniApp) {
+        try {
+          // Notify Farcaster that the app is ready (removes splash screen)
+          window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+          
+          // Set viewport for mobile optimization in Farcaster
+          const viewport = document.querySelector('meta[name="viewport"]')
+          if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
+          }
+          
+          // Optimize body for frame experience
+          document.body.style.overflow = 'auto'
+          ;(document.body.style as any).WebkitOverflowScrolling = 'touch'
+          document.body.classList.add('farcaster-optimized')
+          
+          // Listen for Farcaster frame events
+          const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'farcaster.frame.resize') {
+              // Handle frame resize if needed
+              console.log('Farcaster frame resized:', event.data)
+            }
+          }
+          
+          window.addEventListener('message', handleMessage)
+          
+          console.log('✅ BlockIQ initialized for Farcaster Mini App')
+          
+          return () => {
+            window.removeEventListener('message', handleMessage)
+          }
+        } catch (error) {
+          console.warn('⚠️ Farcaster integration error:', error)
+        }
+      }
     }
   }, [])
 
@@ -1301,6 +1338,45 @@ export default function BlockchainIQQuiz() {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
+  }
+
+  // Farcaster-optimized share functionality for Mini App environment
+  const handleFarcasterShare = (score: number, totalQuestions: number) => {
+    if (typeof window !== 'undefined') {
+      const shareText = `🧠 I just scored ${score}/${totalQuestions} on BlockIQ - the Blockchain IQ Quiz!\n\nTest your knowledge: `
+      const shareUrl = window.location.href
+      
+      // Try Farcaster native sharing first
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'sdk.actions.share',
+          data: {
+            text: shareText,
+            url: shareUrl
+          }
+        }, '*')
+      } else {
+        // Fallback to standard sharing
+        if (navigator.share) {
+          navigator.share({
+            title: 'BlockIQ Quiz Results',
+            text: shareText,
+            url: shareUrl
+          })
+        } else {
+          navigator.clipboard.writeText(shareText + shareUrl)
+          alert('Results copied to clipboard!')
+        }
+      }
+    }
+  }
+
+  // Enhanced Mobile-First Design Helper for Farcaster
+  const isMobileView = () => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 768 || window.navigator.userAgent.includes('Farcaster')
+    }
+    return false
   }
 
   // Get timer color based on remaining time
@@ -1431,47 +1507,55 @@ export default function BlockchainIQQuiz() {
   const selectedAnswer = quizState.selectedAnswers[quizState.currentQuestion]
   const progress = ((quizState.currentQuestion + 1) / 10) * 100
 
-  // Welcome Screen
+  // Welcome Screen - Optimized for Farcaster Mini App
   if (!quizState.quizStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-2 sm:p-4">
         <div className="w-full max-w-2xl mx-auto">
           <Card className="shadow-xl border-0 rounded-2xl">
-            <CardHeader className="text-center space-y-6">
+            <CardHeader className="text-center space-y-4 sm:space-y-6 p-4 sm:p-6">
               <div className="flex justify-center mb-2">
-                <img src="/BlockIQ.png" alt="BlockIQ Logo" className="h-24 w-24 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover" />
+                <img 
+                  src="/BlockIQ.png" 
+                  alt="BlockIQ Logo" 
+                  className="h-16 w-16 sm:h-24 sm:w-24 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover" 
+                />
               </div>
-              <CardTitle className="text-4xl font-extrabold text-blue-700 tracking-tight">BlockIQ</CardTitle>
-              <CardDescription className="text-lg text-gray-700 max-w-lg mx-auto">
+              <CardTitle className="text-2xl sm:text-4xl font-extrabold text-blue-700 tracking-tight">BlockIQ</CardTitle>
+              <CardDescription className="text-sm sm:text-lg text-gray-700 max-w-lg mx-auto px-2">
                 <span className="block font-semibold text-blue-600 mb-2">Blockchain IQ Quiz</span>
                 Test your knowledge of blockchain, Base, EVM, and crypto concepts.<br />
                 Challenge yourself, pay to see your score, and share your results!
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="bg-blue-50/80 p-6 rounded-xl space-y-4 border border-blue-100">
-                <h3 className="font-semibold text-gray-900 text-lg">How it works:</h3>
-                <ul className="space-y-2 text-base text-gray-700">
+            <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-6">
+              <div className="bg-blue-50/80 p-4 sm:p-6 rounded-xl space-y-3 sm:space-y-4 border border-blue-100">
+                <h3 className="font-semibold text-gray-900 text-base sm:text-lg">How it works:</h3>
+                <ul className="space-y-2 text-sm sm:text-base text-gray-700">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    10 randomly selected questions from our comprehensive database
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
+                    <span>10 randomly selected questions from our comprehensive database</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    10-minute time limit with automatic submission
+                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                    <span>10-minute time limit with automatic submission</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-purple-600" />
-                    IQ-style scoring system (50-150 point range)
+                    <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
+                    <span>IQ-style scoring system (50-150 point range)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Eye className="h-5 w-5 text-orange-600" />
-                    Pay a small ETH fee to unlock your score and detailed results
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0" />
+                    <span>Pay a small ETH fee to unlock your score and detailed results</span>
                   </li>
                 </ul>
               </div>
               <div className="text-center">
-                <Button onClick={startQuiz} size="lg" className="px-10 py-4 text-xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all">
+                <Button 
+                  onClick={startQuiz} 
+                  size="lg" 
+                  className="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 text-lg sm:text-xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all touch-manipulation"
+                >
                   Start Quiz
                 </Button>
               </div>
@@ -1482,19 +1566,31 @@ export default function BlockchainIQQuiz() {
     )
   }
 
-  // Payment Screen
+  // Payment Screen - Optimized for Farcaster Mini App
   if (showPayment) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
-          <Card className="text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl">Quiz Complete!</CardTitle>
-              <CardDescription>
-                You've finished the IQ quiz. Pay 0.0001 ETH to unlock your detailed results and score.
+          <Card className="text-center shadow-lg">
+            <CardHeader className="space-y-4">
+              <div className="flex justify-center">
+                <Trophy className="h-12 w-12 text-yellow-500" />
+              </div>
+              <CardTitle className="text-xl sm:text-2xl">Quiz Complete!</CardTitle>
+              <CardDescription className="text-sm sm:text-base px-2">
+                You've finished the BlockIQ quiz! Pay 0.0001 ETH to unlock your detailed results and share your score on Farcaster.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  🎯 <strong>What you'll get:</strong><br />
+                  • Your detailed IQ score breakdown<br />
+                  • Time bonus calculations<br />
+                  • Review of all questions & answers<br />
+                  • Shareable results for Farcaster
+                </p>
+              </div>
               <PayToSeeScore 
                 onPaymentSuccess={handlePaymentSuccess}
                 disabled={false}
@@ -1510,7 +1606,7 @@ export default function BlockchainIQQuiz() {
   if (showResults) {
     const scoreData = calculateScore()
 
-    // Show our new ScoreDisplay component instead of the old results
+    // Show our new ScoreDisplay component with Farcaster sharing
     if (paymentCompleted && !showDetailedResults) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -1520,6 +1616,7 @@ export default function BlockchainIQQuiz() {
             timeSpent={Math.floor((Date.now() - quizState.startTime) / 1000)}
             onRestart={resetQuiz}
             onShowDetailed={() => setShowDetailedResults(true)}
+            onShare={() => handleFarcasterShare(scoreData.correctAnswers, 10)}
           />
         </div>
       )
@@ -1681,35 +1778,37 @@ export default function BlockchainIQQuiz() {
     )
   }
 
-  // Quiz Interface
+  // Quiz Interface - Optimized for Farcaster Mini App
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 overflow-auto">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Brain className="h-8 w-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Base Blockchain IQ Assessment</h1>
+        {/* Header - Compact for mobile */}
+        <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">BlockIQ Assessment</h1>
           </div>
-          <div className={`flex items-center gap-2 text-lg font-mono ${getTimerColor()}`}>
-            <Clock className="h-5 w-5" />
+          <div className={`flex items-center gap-2 text-base sm:text-lg font-mono ${getTimerColor()}`}>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
             {formatTime(quizState.timeRemaining)}
           </div>
         </div>
 
-        {/* Progress */}
-        <div className="mb-8">
+        {/* Progress - Enhanced for mobile */}
+        <div className="mb-6 sm:mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">Question {quizState.currentQuestion + 1} of 10</span>
-            <Badge variant="outline">{currentQuestion?.category}</Badge>
+            <Badge variant="outline" className="text-xs sm:text-sm">{currentQuestion?.category}</Badge>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-2 sm:h-3" />
         </div>
 
-        {/* Question */}
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 leading-relaxed">{currentQuestion?.question}</h2>
+        {/* Question - Mobile-optimized */}
+        <Card className="mb-6 sm:mb-8">
+          <CardContent className="p-4 sm:p-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
+              {currentQuestion?.question}
+            </h2>
 
             <div className="space-y-3">
               {currentQuestion?.options.map((option, index) => {
@@ -1720,13 +1819,18 @@ export default function BlockchainIQQuiz() {
                   <button
                     key={index}
                     onClick={() => selectAnswer(optionLetter)}
-                    className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                    className={`w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all duration-200 touch-manipulation ${
                       isSelected
                         ? "border-blue-500 bg-blue-50 text-blue-900"
-                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
                     }`}
                   >
-                    <span className="text-base">{option}</span>
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-semibold">
+                        {optionLetter}
+                      </span>
+                      <span className="text-sm sm:text-base">{option}</span>
+                    </div>
                   </button>
                 )
               })}
@@ -1734,12 +1838,17 @@ export default function BlockchainIQQuiz() {
           </CardContent>
         </Card>
 
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            {selectedAnswer ? "Answer selected" : "Select an answer to continue"}
+        {/* Navigation - Mobile-first */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0 bg-gray-50 pt-4 pb-safe">
+          <div className="text-sm text-gray-500 text-center sm:text-left">
+            {selectedAnswer ? "Answer selected ✓" : "Select an answer to continue"}
           </div>
-          <Button onClick={nextQuestion} disabled={!selectedAnswer} size="lg" className="px-8">
+          <Button 
+            onClick={nextQuestion} 
+            disabled={!selectedAnswer} 
+            size="lg" 
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold touch-manipulation disabled:opacity-50"
+          >
             {quizState.currentQuestion === 9 ? "Submit Assessment" : "Next Question"}
           </Button>
         </div>

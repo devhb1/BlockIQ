@@ -16,9 +16,10 @@ interface ScoreDisplayProps {
   timeSpent: number
   onRestart: () => void
   onShowDetailed?: () => void
+  onShare?: () => void // Optional custom share handler (e.g., for Farcaster)
 }
 
-export default function ScoreDisplay({ score, totalQuestions, timeSpent, onRestart, onShowDetailed }: ScoreDisplayProps) {
+export default function ScoreDisplay({ score, totalQuestions, timeSpent, onRestart, onShowDetailed, onShare }: ScoreDisplayProps) {
   // Calculate percentage score
   const percentage = Math.round((score / totalQuestions) * 100)
 
@@ -45,8 +46,15 @@ export default function ScoreDisplay({ score, totalQuestions, timeSpent, onResta
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Share results using Web Share API or fallback to clipboard
+  // Share results using custom handler (Farcaster) or Web Share API fallback
   const shareResults = () => {
+    // If custom share handler is provided (e.g., for Farcaster), use it
+    if (onShare) {
+      onShare()
+      return
+    }
+
+    // Fallback to standard sharing
     const text = `I just scored ${score}/${totalQuestions} (${percentage}%) on BlockIQ! 🧠 Test your blockchain knowledge too!`
     const url = window.location.origin
     // Check if Web Share API is available

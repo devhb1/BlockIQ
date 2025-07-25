@@ -1,6 +1,6 @@
 {
   "name": "BlockIQ",
-  "description": "Your Mini App Description",
+  "description": "Test your blockchain knowledge with BlockIQ - the comprehensive crypto & Web3 IQ quiz. Challenge yourself, pay to see your score, and share results!",
   "url": "https://www.blockiq.xyz/",
   "icons": [
     {
@@ -9,5 +9,16 @@
       "type": "image/png"
     }
   ],
-  "sdk_version": "1.0.0"
+  "sdk_version": "1.0.0",
+  "manifest_version": "1.0.0",
+  "developer": {
+    "name": "BlockIQ Team",
+    "url": "https://www.blockiq.xyz/"
+  },
+  "categories": ["education", "quiz", "blockchain", "web3"],
+  "features": {
+    "share": true,
+    "payments": true,
+    "analytics": false
+  }
 }
