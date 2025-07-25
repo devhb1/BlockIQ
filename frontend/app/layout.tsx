@@ -78,10 +78,11 @@ export default function RootLayout({
       <body>
         <ClientWeb3Provider>
           {/* This component calls await sdk.actions.ready() once per page load */}
-          <FarcasterReady>{null}</FarcasterReady>
+          <FarcasterReady />
           {children}
         </ClientWeb3Provider>
       </body>
     </html>
   );
 }
+ 
