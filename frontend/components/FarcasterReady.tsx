@@ -6,7 +6,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 
 export default function FarcasterReady() {
   useEffect(() => {
-    if (typeof window === "undefined" || window.parent === window) return;
+    if (typeof window === "undefined") return; // Only skip on server
 
     (async () => {
       try {
