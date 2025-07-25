@@ -1,0 +1,42 @@
+{
+  "name": "IQ Quiz Contest",
+  "description": "Test your blockchain IQ and pay to see your score! Challenge yourself with questions about Base, EVM, and general blockchain knowledge.",
+  "url": "https://your-app-url.com",
+  "icon": "https://your-app-url.com/placeholder-logo.png",
+  "accountAssociation": {
+    "type": "ethereum"
+  },
+  "frame": {
+    "version": "1",
+    "name": "IQ Quiz Contest",
+    "iconUrl": "https://your-app-url.com/placeholder-logo.png",
+    "splashImageUrl": "https://your-app-url.com/placeholder-logo.png",
+    "splashBackgroundColor": "#1f2937",
+    "homeUrl": "https://your-app-url.com",
+    "subtitle": "Test your blockchain knowledge",
+    "description": "Challenge yourself with questions about Base, EVM, and blockchain technology. Pay 0.0001 ETH to unlock your IQ score!",
+    "screenshotUrls": [
+      "https://your-app-url.com/screenshot1.png",
+      "https://your-app-url.com/screenshot2.png"
+    ],
+    "primaryCategory": "education",
+    "tags": [
+      "quiz",
+      "blockchain",
+      "education",
+      "base",
+      "ethereum",
+      "learning"
+    ],
+    "heroImageUrl": "https://your-app-url.com/hero.png",
+    "tagline": "Challenge your blockchain knowledge",
+    "ogTitle": "IQ Quiz Contest - Blockchain Knowledge Test",
+    "ogDescription": "Test your understanding of Base, EVM, and blockchain technology. Pay to unlock your detailed IQ score and explanations.",
+    "ogImageUrl": "https://your-app-url.com/og-image.png"
+  },
+  "miniApp": {
+    "version": "1.0",
+    "features": ["wallet", "payments"],
+    "networks": ["base", "ethereum"]
+  }
+}
