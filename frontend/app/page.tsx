@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { sdk } from '@farcaster/miniapp-sdk';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -10,15 +11,8 @@ import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye, Trophy } from "luci
 import PayToSeeScore from "@/components/PayToSeeScore"
 import ScoreDisplay from "@/components/ScoreDisplay"
 
-// Farcaster SDK detection
-const isFarcasterMiniApp = () => {
-  if (typeof window !== 'undefined') {
-    return window.location.hostname.includes('farcaster') || 
-           window.navigator.userAgent.includes('Farcaster') ||
-           window.parent !== window
-  }
-  return false
-}
+
+// ...existing code...
 
 // Question data structure
 interface Question {
@@ -1254,6 +1248,13 @@ interface QuizState {
 }
 
 export default function BlockchainIQQuiz() {
+  // Farcaster Mini App SDK: Notify Farcaster that the app is ready (removes splash screen)
+  useEffect(() => {
+    (async () => {
+      await sdk.actions.ready();
+    })();
+  }, []);
+
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestion: 0,
     selectedAnswers: {},
@@ -1286,52 +1287,7 @@ export default function BlockchainIQQuiz() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
-  // Enhanced Farcaster Mini App integration with error handling
-  useEffect(() => {
-    // Check if running inside Farcaster Mini App environment
-    if (typeof window !== 'undefined') {
-      const isFarcasterMiniApp = window.parent !== window || 
-                                window.location !== window.parent.location ||
-                                document.referrer.includes('farcaster') ||
-                                window.navigator.userAgent.includes('Farcaster')
-      
-      if (isFarcasterMiniApp) {
-        try {
-          // Notify Farcaster that the app is ready (removes splash screen)
-          window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
-          
-          // Set viewport for mobile optimization in Farcaster
-          const viewport = document.querySelector('meta[name="viewport"]')
-          if (viewport) {
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
-          }
-          
-          // Optimize body for frame experience
-          document.body.style.overflow = 'auto'
-          ;(document.body.style as any).WebkitOverflowScrolling = 'touch'
-          document.body.classList.add('farcaster-optimized')
-          
-          // Listen for Farcaster frame events
-          const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'farcaster.frame.resize') {
-              // Handle frame resize if needed
-              console.log('Farcaster frame resized:', event.data)
-            }
-          }
-          
-          window.addEventListener('message', handleMessage)
-          
-          console.log('✅ BlockIQ initialized for Farcaster Mini App')
-          
-          return () => {
-            window.removeEventListener('message', handleMessage)
-          }
-        } catch (error) {
-          console.warn('⚠️ Farcaster integration error:', error)
-        }
-      }
-    }
-  }, [])
+  // ...existing code...
 
   // Format time display
   const formatTime = (seconds: number) => {
