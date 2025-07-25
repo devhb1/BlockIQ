@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -1251,16 +1252,10 @@ interface QuizState {
   startTime: number
 }
 
-<<<<<<< HEAD
-export default function BlockchainIQQuiz() {
-  // Immediate Farcaster ready signal - fires as soon as component mounts
-  useEffect(() => {
-=======
 export default function HomePage() {
   // Merged Farcaster SDK ready signal: ensures sdk.actions.ready() is called once on mount
   useEffect(() => {
     sdk.actions.ready();
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
     const sendReadySignal = () => {
       if (typeof window !== 'undefined' && window.parent) {
         try {
@@ -1272,19 +1267,6 @@ export default function HomePage() {
       }
     }
     
-<<<<<<< HEAD
-    // Send immediately
-    sendReadySignal()
-    
-    // Also send on window load as backup
-    if (typeof window !== 'undefined') {
-      if (document.readyState === 'loading') {
-        window.addEventListener('load', sendReadySignal)
-        return () => window.removeEventListener('load', sendReadySignal)
-      }
-    }
-  }, [])
-=======
     sendReadySignal(); // Initial send
 
     if (typeof window !== 'undefined') {
@@ -1348,7 +1330,6 @@ export default function HomePage() {
       }
     }
   }, []);
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
 
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestion: 0,
@@ -1380,78 +1361,6 @@ export default function HomePage() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
-<<<<<<< HEAD
-  // Enhanced Farcaster Mini App integration with error handling
-  useEffect(() => {
-    // Always try to send ready signal for Farcaster - this is safe and ensures compatibility
-    if (typeof window !== 'undefined') {
-      try {
-        // Primary ready signal - this is the main one Farcaster looks for
-        window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
-        
-        // Additional ready signals for compatibility
-        window.parent.postMessage({ 
-          type: 'farcaster_frame_ready',
-          data: { ready: true }
-        }, '*')
-        
-        // Also try direct postMessage format
-        window.parent.postMessage('sdk.actions.ready', '*')
-        
-        console.log('✅ Farcaster ready signals sent')
-        
-        // Enhanced detection for additional optimizations
-        const isFarcasterMiniApp = window.parent !== window || 
-                                  window.location !== window.parent.location ||
-                                  document.referrer.includes('farcaster') ||
-                                  window.navigator.userAgent.includes('Farcaster') ||
-                                  window.location.hostname.includes('farcaster')
-        
-        if (isFarcasterMiniApp) {
-          // Set viewport for mobile optimization in Farcaster
-          const viewport = document.querySelector('meta[name="viewport"]')
-          if (viewport) {
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
-          }
-          
-          // Optimize body for frame experience
-          document.body.style.overflow = 'auto'
-          ;(document.body.style as any).WebkitOverflowScrolling = 'touch'
-          document.body.classList.add('farcaster-optimized')
-          
-          // Listen for Farcaster frame events
-          const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'farcaster.frame.resize') {
-              console.log('Farcaster frame resized:', event.data)
-            }
-          }
-          
-          window.addEventListener('message', handleMessage)
-          
-          console.log('✅ BlockIQ optimized for Farcaster Mini App environment')
-          
-          return () => {
-            window.removeEventListener('message', handleMessage)
-          }
-        }
-        
-      } catch (error) {
-        console.warn('⚠️ Farcaster integration error:', error)
-        // Fallback: try again after a short delay
-        setTimeout(() => {
-          try {
-            window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
-            console.log('✅ Farcaster ready signal sent (fallback)')
-          } catch (e) {
-            console.warn('⚠️ Fallback ready signal failed:', e)
-          }
-        }, 100)
-      }
-    }
-  }, [])
-
-=======
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
   // Format time display
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -1621,133 +1530,6 @@ export default function HomePage() {
   const selectedAnswer = quizState.selectedAnswers[quizState.currentQuestion]
   const progress = ((quizState.currentQuestion + 1) / 10) * 100
 
-<<<<<<< HEAD
-  // Welcome Screen - Optimized for Farcaster Mini App
-  if (!quizState.quizStarted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-2 sm:p-4">
-        <div className="w-full max-w-2xl mx-auto">
-          <Card className="shadow-xl border-0 rounded-2xl">
-            <CardHeader className="text-center space-y-4 sm:space-y-6 p-4 sm:p-6">
-              <div className="flex justify-center mb-2">
-                <img 
-                  src="/BlockIQ.png" 
-                  alt="BlockIQ Logo" 
-                  className="h-16 w-16 sm:h-24 sm:w-24 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover" 
-                />
-              </div>
-              <CardTitle className="text-2xl sm:text-4xl font-extrabold text-blue-700 tracking-tight">BlockIQ</CardTitle>
-              <CardDescription className="text-sm sm:text-lg text-gray-700 max-w-lg mx-auto px-2">
-                <span className="block font-semibold text-blue-600 mb-2">Blockchain IQ Quiz</span>
-                Test your knowledge of blockchain, Base, EVM, and crypto concepts.<br />
-                Challenge yourself, pay to see your score, and share your results!
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-6">
-              <div className="bg-blue-50/80 p-4 sm:p-6 rounded-xl space-y-3 sm:space-y-4 border border-blue-100">
-                <h3 className="font-semibold text-gray-900 text-base sm:text-lg">How it works:</h3>
-                <ul className="space-y-2 text-sm sm:text-base text-gray-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
-                    <span>10 randomly selected questions from our comprehensive database</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
-                    <span>10-minute time limit with automatic submission</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
-                    <span>IQ-style scoring system (50-150 point range)</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0" />
-                    <span>Pay a small ETH fee to unlock your score and detailed results</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="text-center">
-                <Button 
-                  onClick={startQuiz} 
-                  size="lg" 
-                  className="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 text-lg sm:text-xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all touch-manipulation"
-                >
-                  Start Quiz
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
-  // Payment Screen - Optimized for Farcaster Mini App
-  if (showPayment) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-6">
-          <Card className="text-center shadow-lg">
-            <CardHeader className="space-y-4">
-              <div className="flex justify-center">
-                <Trophy className="h-12 w-12 text-yellow-500" />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl">Quiz Complete!</CardTitle>
-              <CardDescription className="text-sm sm:text-base px-2">
-                You've finished the BlockIQ quiz! Pay 0.0001 ETH to unlock your detailed results and share your score on Farcaster.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  🎯 <strong>What you'll get:</strong><br />
-                  • Your detailed IQ score breakdown<br />
-                  • Time bonus calculations<br />
-                  • Review of all questions & answers<br />
-                  • Shareable results for Farcaster
-                </p>
-              </div>
-              <PayToSeeScore 
-                onPaymentSuccess={handlePaymentSuccess}
-                disabled={false}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
-  // Results Screen
-  if (showResults) {
-    const scoreData = calculateScore()
-    // Show our new ScoreDisplay component with Farcaster sharing
-    if (paymentCompleted && !showDetailedResults) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <ScoreDisplay
-            score={scoreData.correctAnswers}
-            totalQuestions={10}
-            timeSpent={Math.floor((Date.now() - quizState.startTime) / 1000)}
-            onRestart={resetQuiz}
-            onShowDetailed={() => setShowDetailedResults(true)}
-            onShare={() => handleFarcasterShare(scoreData.correctAnswers, 10)}
-          />
-        </div>
-      )
-    }
-
-    if (showDetailedResults) {
-      return (
-        <div className="min-h-screen bg-gray-50 p-4">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl">Detailed Results Review</CardTitle>
-                  <Button variant="outline" onClick={() => setShowDetailedResults(false)}>
-                    Back to Summary
-                  </Button>
-=======
   return (
     <ClientWeb3Provider>
       {/* Welcome Screen - Optimized for Farcaster Mini App */}
@@ -1762,7 +1544,6 @@ export default function HomePage() {
                     alt="BlockIQ Logo" 
                     className="h-16 w-16 sm:h-24 sm:w-24 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover" 
                   />
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
                 </div>
                 <CardTitle className="text-2xl sm:text-4xl font-extrabold text-blue-700 tracking-tight">BlockIQ</CardTitle>
                 <CardDescription className="text-sm sm:text-lg text-gray-700 max-w-lg mx-auto px-2">
@@ -1771,58 +1552,6 @@ export default function HomePage() {
                   Challenge yourself, pay to see your score, and share your results!
                 </CardDescription>
               </CardHeader>
-<<<<<<< HEAD
-              <CardContent>
-                <div className="space-y-6">
-                  {quizState.selectedQuestions.map((question, index) => {
-                    const userAnswer = quizState.selectedAnswers[index]
-                    const isCorrect = userAnswer === question.correctAnswer
-                    const wasAnswered = userAnswer !== undefined
-                    return (
-                      <div key={question.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-start gap-3">
-                          <Badge variant={isCorrect ? "default" : wasAnswered ? "destructive" : "secondary"}>
-                            Q{index + 1}
-                          </Badge>
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900 mb-3">{question.question}</p>
-                            <div className="space-y-2">
-                              {question.options.map((option, optionIndex) => {
-                                const optionLetter = String.fromCharCode(65 + optionIndex) // A, B, C, D
-                                const isUserAnswer = userAnswer === optionLetter
-                                const isCorrectAnswer = question.correctAnswer === optionLetter
-                                return (
-                                  <div
-                                    key={optionIndex}
-                                    className={`p-2 rounded border ${
-                                      isCorrectAnswer
-                                        ? "bg-green-50 border-green-200 text-green-800"
-                                        : isUserAnswer && !isCorrectAnswer
-                                          ? "bg-red-50 border-red-200 text-red-800"
-                                          : "bg-gray-50 border-gray-200"
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      {isCorrectAnswer && <CheckCircle className="h-4 w-4 text-green-600" />}
-                                      {isUserAnswer && !isCorrectAnswer && <XCircle className="h-4 w-4 text-red-600" />}
-                                      <span className="text-sm">{option}</span>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                            {!wasAnswered && <p className="text-sm text-gray-500 mt-2">No answer selected</p>}
-                            <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
-                              <p className="text-sm text-blue-800">
-                                <strong>Explanation:</strong> {question.explanation}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-=======
               <CardContent className="space-y-6 sm:space-y-8 p-4 sm:p-6">
                 <div className="bg-blue-50/80 p-4 sm:p-6 rounded-xl space-y-3 sm:space-y-4 border border-blue-100">
                   <h3 className="font-semibold text-gray-900 text-base sm:text-lg">How it works:</h3>
@@ -1844,7 +1573,6 @@ export default function HomePage() {
                       <span>Pay a small ETH fee to unlock your score and detailed results</span>
                     </li>
                   </ul>
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
                 </div>
                 <div className="text-center">
                   <Button 
@@ -1861,35 +1589,6 @@ export default function HomePage() {
         </div>
       )}
 
-<<<<<<< HEAD
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <Brain className="h-16 w-16 text-blue-600" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-gray-900">Assessment Complete</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <div className="text-5xl font-bold text-blue-600 mb-2">{scoreData.finalScore}</div>
-              <p className="text-xl text-gray-700 mb-4">Blockchain IQ Score</p>
-              <div className="text-sm text-gray-600">
-                {scoreData.finalScore >= 130 && "Exceptional blockchain knowledge"}
-                {scoreData.finalScore >= 115 && scoreData.finalScore < 130 && "Above average understanding"}
-                {scoreData.finalScore >= 100 && scoreData.finalScore < 115 && "Good foundational knowledge"}
-                {scoreData.finalScore >= 85 && scoreData.finalScore < 100 && "Developing understanding"}
-                {scoreData.finalScore < 85 && "Room for improvement - keep learning!"}
-              </div>
-            </div>
-            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-              <h3 className="font-semibold text-gray-900">Score Breakdown:</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Base Score:</span>
-                  <span>{scoreData.baseScore} points</span>
-=======
       {/* Payment Screen - Optimized for Farcaster Mini App */}
       {showPayment && (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -1898,7 +1597,6 @@ export default function HomePage() {
               <CardHeader className="space-y-4">
                 <div className="flex justify-center">
                   <Trophy className="h-12 w-12 text-yellow-500" />
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
                 </div>
                 <CardTitle className="text-xl sm:text-2xl">Quiz Complete!</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
@@ -1915,99 +1613,6 @@ export default function HomePage() {
                     • Shareable results for Farcaster
                   </p>
                 </div>
-<<<<<<< HEAD
-                <div className="flex justify-between text-red-700">
-                  <span>Incorrect Answers ({scoreData.incorrectAnswers}):</span>
-                  <span>-{scoreData.incorrectPenalty} points</span>
-                </div>
-                <div className="flex justify-between text-blue-700">
-                  <span>Time Bonus:</span>
-                  <span>+{scoreData.timeBonus} points</span>
-                </div>
-                <hr className="my-2" />
-                <div className="flex justify-between font-semibold">
-                  <span>Final Score:</span>
-                  <span>{scoreData.finalScore} points</span>
-                </div>
-              </div>
-            </div>
-            <div className="bg-blue-50 p-6 rounded-lg space-y-2">
-              <h3 className="font-semibold text-gray-900">Performance Summary:</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Accuracy:</span>
-                  <span className="ml-2 font-medium">{scoreData.accuracy}%</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Completion Time:</span>
-                  <span className="ml-2 font-medium">{scoreData.completionTime} min</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <Button onClick={() => setShowDetailedResults(true)} variant="outline">
-                Review Answers
-              </Button>
-              <Button onClick={resetQuiz}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Retake Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // Main Quiz Interface
-  return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 overflow-auto">
-      <div className="max-w-4xl mx-auto">
-        {/* Header - Compact for mobile */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">BlockIQ Assessment</h1>
-          </div>
-          <div className={`flex items-center gap-2 text-base sm:text-lg font-mono ${getTimerColor()}`}>
-            <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
-            {formatTime(quizState.timeRemaining)}
-          </div>
-        </div>
-        {/* Progress - Enhanced for mobile */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Question {quizState.currentQuestion + 1} of 10</span>
-            <Badge variant="outline" className="text-xs sm:text-sm">{currentQuestion?.category}</Badge>
-          </div>
-          <Progress value={progress} className="h-2 sm:h-3" />
-        </div>
-        {/* Question - Mobile-optimized */}
-        <Card className="mb-6 sm:mb-8">
-          <CardContent className="p-4 sm:p-8">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
-              {currentQuestion?.question}
-            </h2>
-            <div className="space-y-3">
-              {currentQuestion?.options.map((option, index) => {
-                const optionLetter = String.fromCharCode(65 + index) // A, B, C, D
-                const isSelected = selectedAnswer === optionLetter
-                return (
-                  <button
-                    key={index}
-                    onClick={() => selectAnswer(optionLetter)}
-                    className={`w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all duration-200 touch-manipulation ${
-                      isSelected
-                        ? "border-blue-500 bg-blue-50 text-blue-900"
-                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-semibold">
-                        {optionLetter}
-                      </span>
-                      <span className="text-sm sm:text-base">{option}</span>
-=======
                 <PayToSeeScore 
                   onPaymentSuccess={handlePaymentSuccess}
                   disabled={false}
@@ -2130,7 +1735,6 @@ export default function HomePage() {
                       {scoreData.finalScore >= 100 && scoreData.finalScore < 115 && "Good foundational knowledge"}
                       {scoreData.finalScore >= 85 && scoreData.finalScore < 100 && "Developing understanding"}
                       {scoreData.finalScore < 85 && "Room for improvement - keep learning!"}
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
                     </div>
                   </div>
                   <div className="bg-gray-50 p-6 rounded-lg space-y-4">
@@ -2184,14 +1788,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </div>
-<<<<<<< HEAD
-          </CardContent>
-        </Card>
-        {/* Navigation - Mobile-first */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0 bg-gray-50 pt-4 pb-safe">
-          <div className="text-sm text-gray-500 text-center sm:text-left">
-            {selectedAnswer ? "Answer selected ✓" : "Select an answer to continue"}
-=======
           )
         }
       )()}
@@ -2265,7 +1861,6 @@ export default function HomePage() {
                 {quizState.currentQuestion === 9 ? "Submit Assessment" : "Next Question"}
               </Button>
             </div>
->>>>>>> 96c581d (MINI-APP SDK READY FIX)
           </div>
         </div>
       )}
