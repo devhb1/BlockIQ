@@ -1,8 +1,5 @@
-
 "use client"
-
 import { useState, useEffect, useCallback } from "react"
-import { sdk } from '@farcaster/miniapp-sdk';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -11,8 +8,15 @@ import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye, Trophy } from "luci
 import PayToSeeScore from "@/components/PayToSeeScore"
 import ScoreDisplay from "@/components/ScoreDisplay"
 
-
-// ...existing code...
+// Global Farcaster ready signal - fires immediately when script loads
+if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+  try {
+    window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+    console.log('🌟 Global ready signal sent on script load')
+  } catch (error) {
+    console.warn('⚠️ Global ready signal failed:', error)
+  }
+}
 
 // Question data structure
 interface Question {
@@ -407,7 +411,6 @@ const questionPool: Question[] = [
     correctAnswer: "C",
     explanation: "Base Batches is the global program fostering on-chain application development.",
   },
-
   // EVM Questions (33 questions)
   {
     id: 34,
@@ -795,7 +798,6 @@ const questionPool: Question[] = [
     correctAnswer: "B",
     explanation: "EVM compatibility enhances blockchain functionality and Ethereum interoperability.",
   },
-
   // General Crypto Terms Questions (34 questions)
   {
     id: 67,
@@ -1248,24 +1250,30 @@ interface QuizState {
 }
 
 export default function BlockchainIQQuiz() {
-  const [isReady, setIsReady] = useState(false)
-
+  // Immediate Farcaster ready signal - fires as soon as component mounts
   useEffect(() => {
-    async function notifyReady() {
-      try {
-        await sdk.actions.ready()
-        console.log("✅ Farcaster ready() called")
-      } catch (e) {
-        console.error("Failed to call sdk.actions.ready()", e)
+    const sendReadySignal = () => {
+      if (typeof window !== 'undefined' && window.parent) {
+        try {
+          window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+          console.log('🚀 Immediate ready signal sent')
+        } catch (error) {
+          console.warn('⚠️ Immediate ready signal failed:', error)
+        }
       }
-      setIsReady(true)
     }
-    if (!isReady) notifyReady()
-  }, [isReady])
-
-  if (!isReady) {
-    return <div>Loading interface…</div>
-  }
+    
+    // Send immediately
+    sendReadySignal()
+    
+    // Also send on window load as backup
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'loading') {
+        window.addEventListener('load', sendReadySignal)
+        return () => window.removeEventListener('load', sendReadySignal)
+      }
+    }
+  }, [])
 
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestion: 0,
@@ -1276,7 +1284,6 @@ export default function BlockchainIQQuiz() {
     selectedQuestions: [],
     startTime: 0,
   })
-
   const [showResults, setShowResults] = useState(false)
   const [showDetailedResults, setShowDetailedResults] = useState(false)
   const [paymentCompleted, setPaymentCompleted] = useState(false)
@@ -1291,7 +1298,6 @@ export default function BlockchainIQQuiz() {
           timeRemaining: prev.timeRemaining - 1,
         }))
       }, 1000)
-
       return () => clearInterval(timer)
     } else if (quizState.timeRemaining === 0 && !quizState.quizCompleted) {
       // Auto-submit when time runs out
@@ -1299,7 +1305,74 @@ export default function BlockchainIQQuiz() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
-  // ...existing code...
+  // Enhanced Farcaster Mini App integration with error handling
+  useEffect(() => {
+    // Always try to send ready signal for Farcaster - this is safe and ensures compatibility
+    if (typeof window !== 'undefined') {
+      try {
+        // Primary ready signal - this is the main one Farcaster looks for
+        window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+        
+        // Additional ready signals for compatibility
+        window.parent.postMessage({ 
+          type: 'farcaster_frame_ready',
+          data: { ready: true }
+        }, '*')
+        
+        // Also try direct postMessage format
+        window.parent.postMessage('sdk.actions.ready', '*')
+        
+        console.log('✅ Farcaster ready signals sent')
+        
+        // Enhanced detection for additional optimizations
+        const isFarcasterMiniApp = window.parent !== window || 
+                                  window.location !== window.parent.location ||
+                                  document.referrer.includes('farcaster') ||
+                                  window.navigator.userAgent.includes('Farcaster') ||
+                                  window.location.hostname.includes('farcaster')
+        
+        if (isFarcasterMiniApp) {
+          // Set viewport for mobile optimization in Farcaster
+          const viewport = document.querySelector('meta[name="viewport"]')
+          if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
+          }
+          
+          // Optimize body for frame experience
+          document.body.style.overflow = 'auto'
+          ;(document.body.style as any).WebkitOverflowScrolling = 'touch'
+          document.body.classList.add('farcaster-optimized')
+          
+          // Listen for Farcaster frame events
+          const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'farcaster.frame.resize') {
+              console.log('Farcaster frame resized:', event.data)
+            }
+          }
+          
+          window.addEventListener('message', handleMessage)
+          
+          console.log('✅ BlockIQ optimized for Farcaster Mini App environment')
+          
+          return () => {
+            window.removeEventListener('message', handleMessage)
+          }
+        }
+        
+      } catch (error) {
+        console.warn('⚠️ Farcaster integration error:', error)
+        // Fallback: try again after a short delay
+        setTimeout(() => {
+          try {
+            window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+            console.log('✅ Farcaster ready signal sent (fallback)')
+          } catch (e) {
+            console.warn('⚠️ Fallback ready signal failed:', e)
+          }
+        }, 100)
+      }
+    }
+  }, [])
 
   // Format time display
   const formatTime = (seconds: number) => {
@@ -1401,7 +1474,6 @@ export default function BlockchainIQQuiz() {
   const calculateScore = () => {
     let correctAnswers = 0
     let incorrectAnswers = 0
-
     quizState.selectedQuestions.forEach((question, index) => {
       const userAnswer = quizState.selectedAnswers[index]
       if (userAnswer === question.correctAnswer) {
@@ -1410,20 +1482,16 @@ export default function BlockchainIQQuiz() {
         incorrectAnswers++
       }
     })
-
     const baseScore = 100
     const correctPoints = correctAnswers * 10
     const incorrectPenalty = incorrectAnswers * 5
-
     // Time bonus calculation
     const completionTime = (Date.now() - quizState.startTime) / 1000 / 60 // in minutes
     let timeBonus = 0
     if (completionTime < 5) timeBonus = 20
     else if (completionTime < 7) timeBonus = 10
     else if (completionTime < 10) timeBonus = 5
-
     const finalScore = Math.max(50, Math.min(150, baseScore + correctPoints - incorrectPenalty + timeBonus))
-
     return {
       correctAnswers,
       incorrectAnswers,
@@ -1573,7 +1641,6 @@ export default function BlockchainIQQuiz() {
   // Results Screen
   if (showResults) {
     const scoreData = calculateScore()
-
     // Show our new ScoreDisplay component with Farcaster sharing
     if (paymentCompleted && !showDetailedResults) {
       return (
@@ -1609,7 +1676,6 @@ export default function BlockchainIQQuiz() {
                     const userAnswer = quizState.selectedAnswers[index]
                     const isCorrect = userAnswer === question.correctAnswer
                     const wasAnswered = userAnswer !== undefined
-
                     return (
                       <div key={question.id} className="border rounded-lg p-4 space-y-3">
                         <div className="flex items-start gap-3">
@@ -1623,7 +1689,6 @@ export default function BlockchainIQQuiz() {
                                 const optionLetter = String.fromCharCode(65 + optionIndex) // A, B, C, D
                                 const isUserAnswer = userAnswer === optionLetter
                                 const isCorrectAnswer = question.correctAnswer === optionLetter
-
                                 return (
                                   <div
                                     key={optionIndex}
@@ -1689,7 +1754,6 @@ export default function BlockchainIQQuiz() {
                 {scoreData.finalScore < 85 && "Room for improvement - keep learning!"}
               </div>
             </div>
-
             <div className="bg-gray-50 p-6 rounded-lg space-y-4">
               <h3 className="font-semibold text-gray-900">Score Breakdown:</h3>
               <div className="space-y-2 text-sm">
@@ -1716,7 +1780,6 @@ export default function BlockchainIQQuiz() {
                 </div>
               </div>
             </div>
-
             <div className="bg-blue-50 p-6 rounded-lg space-y-2">
               <h3 className="font-semibold text-gray-900">Performance Summary:</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1730,7 +1793,6 @@ export default function BlockchainIQQuiz() {
                 </div>
               </div>
             </div>
-
             <div className="flex gap-4 justify-center">
               <Button onClick={() => setShowDetailedResults(true)} variant="outline">
                 Review Answers
@@ -1746,7 +1808,7 @@ export default function BlockchainIQQuiz() {
     )
   }
 
-  // Quiz Interface - Optimized for Farcaster Mini App
+  // Main Quiz Interface
   return (
     <div className="min-h-screen bg-gray-50 p-2 sm:p-4 overflow-auto">
       <div className="max-w-4xl mx-auto">
@@ -1761,7 +1823,6 @@ export default function BlockchainIQQuiz() {
             {formatTime(quizState.timeRemaining)}
           </div>
         </div>
-
         {/* Progress - Enhanced for mobile */}
         <div className="mb-6 sm:mb-8">
           <div className="flex justify-between items-center mb-2">
@@ -1770,19 +1831,16 @@ export default function BlockchainIQQuiz() {
           </div>
           <Progress value={progress} className="h-2 sm:h-3" />
         </div>
-
         {/* Question - Mobile-optimized */}
         <Card className="mb-6 sm:mb-8">
           <CardContent className="p-4 sm:p-8">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 leading-relaxed">
               {currentQuestion?.question}
             </h2>
-
             <div className="space-y-3">
               {currentQuestion?.options.map((option, index) => {
                 const optionLetter = String.fromCharCode(65 + index) // A, B, C, D
                 const isSelected = selectedAnswer === optionLetter
-
                 return (
                   <button
                     key={index}
@@ -1805,7 +1863,6 @@ export default function BlockchainIQQuiz() {
             </div>
           </CardContent>
         </Card>
-
         {/* Navigation - Mobile-first */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0 bg-gray-50 pt-4 pb-safe">
           <div className="text-sm text-gray-500 text-center sm:text-left">
