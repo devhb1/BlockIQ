@@ -1,3 +1,8 @@
+// ---
+// PayToSeeScore Component
+// Handles payment gating for quiz results using Web3 (wagmi, RainbowKit, Base L2)
+// Explains wallet connection, transaction flow, error handling, and UI logic for onboarding and learning.
+// ---
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,9 +15,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Wallet, CheckCircle, XCircle, Brain } from 'lucide-react'
 
-// Replace with your actual ETH address
+// Address to receive payment for unlocking results
 const RECEIVER_ADDRESS = '0xd1c9BD2a14b00C99803B5Ded4571814D227566C7' as `0x${string}`
-const PAYMENT_AMOUNT = '0.0001' // ETH
+// Amount required to unlock results (in ETH)
+const PAYMENT_AMOUNT = '0.0001'
 
 interface PayToSeeScoreProps {
   onPaymentSuccess: () => void
@@ -20,12 +26,16 @@ interface PayToSeeScoreProps {
 }
 
 export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: PayToSeeScoreProps) {
-  const { address, isConnected, chain } = useAccount()
-  const { disconnect } = useDisconnect()
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined)
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  // ---
+  // Hooks for wallet/account state and transaction status
+  // ---
+  const { address, isConnected, chain } = useAccount() // Current wallet/account info
+  const { disconnect } = useDisconnect() // Disconnect wallet
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined) // Transaction hash
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle') // Payment state
+  const [errorMessage, setErrorMessage] = useState<string>('') // Error message
 
+  // wagmi hooks for sending transaction and waiting for confirmation
   const { 
     sendTransaction, 
     error: sendError, 
@@ -41,7 +51,11 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     hash: txHash,
   })
 
-  // Handle transaction hash update
+  // ---
+  // Effects to handle transaction lifecycle and errors
+  // ---
+
+  // When transaction is sent, update hash and status
   useEffect(() => {
     if (sendData) {
       setTxHash(sendData)
@@ -49,7 +63,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     }
   }, [sendData])
 
-  // Handle transaction confirmation
+  // When transaction is confirmed, show success and call parent callback
   useEffect(() => {
     if (isConfirmed && txHash) {
       setPaymentStatus('success')
@@ -59,7 +73,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     }
   }, [isConfirmed, txHash, onPaymentSuccess])
 
-  // Handle errors
+  // Handle errors from sending or confirming transaction
   useEffect(() => {
     if (sendError) {
       setErrorMessage(`Transaction failed: ${sendError.message}`)
@@ -71,6 +85,9 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     }
   }, [sendError, confirmError])
 
+  // ---
+  // Main payment handler: checks wallet, network, sends transaction
+  // ---
   const handlePay = async () => {
     if (!isConnected || !address) {
       return // RainbowKit will handle wallet connection
@@ -86,7 +103,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     try {
       setPaymentStatus('pending')
       setErrorMessage('')
-      
+      // Send ETH to receiver address
       await sendTransaction({
         to: RECEIVER_ADDRESS,
         value: parseEther(PAYMENT_AMOUNT),
@@ -98,6 +115,9 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     }
   }
 
+  // ---
+  // Button text and icon logic for user feedback
+  // ---
   const getButtonText = () => {
     if (!isConnected) return 'Connect Wallet First'
     if (chain?.id !== base.id) return 'Switch to Base Network'
@@ -120,12 +140,14 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
     return <Wallet className="mr-2 h-4 w-4" />
   }
 
+  // Loading and success state helpers
   const isLoading = paymentStatus === 'pending' || isSendPending || isConfirming
   const isSuccess = paymentStatus === 'success'
 
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
+        {/* Title and description for payment gating */}
         <CardTitle className="flex items-center justify-center">
           <Brain className="mr-2 h-6 w-6" />
           Unlock Your IQ Score
@@ -135,6 +157,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Show connected wallet info and network status */}
         {isConnected && (
           <div className="text-sm text-muted-foreground text-center">
             Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
@@ -146,6 +169,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
           </div>
         )}
 
+        {/* Wallet connect UI using RainbowKit */}
         {!isConnected ? (
           <div className="space-y-4">
             <ConnectButton.Custom>
@@ -204,6 +228,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
             </ConnectButton.Custom>
           </div>
         ) : (
+          // Payment button: triggers ETH transaction
           <Button
             onClick={handlePay}
             disabled={disabled || isLoading || isSuccess}
@@ -215,6 +240,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
           </Button>
         )}
 
+        {/* Error alert for payment or network issues */}
         {errorMessage && (
           <Alert variant="destructive">
             <XCircle className="h-4 w-4" />
@@ -222,6 +248,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
           </Alert>
         )}
 
+        {/* Show transaction hash and link to BaseScan explorer */}
         {txHash && (
           <div className="text-sm text-center space-y-2">
             <p className="text-muted-foreground">Transaction Hash:</p>
@@ -236,6 +263,7 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
           </div>
         )}
 
+        {/* Disconnect wallet button for user control */}
         {isConnected && (
           <Button
             variant="outline"

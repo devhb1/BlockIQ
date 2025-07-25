@@ -9,6 +9,16 @@ import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye } from "lucide-react
 import PayToSeeScore from "@/components/PayToSeeScore"
 import ScoreDisplay from "@/components/ScoreDisplay"
 
+// Farcaster SDK detection
+const isFarcasterMiniApp = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.hostname.includes('farcaster') || 
+           window.navigator.userAgent.includes('Farcaster') ||
+           window.parent !== window
+  }
+  return false
+}
+
 // Question data structure
 interface Question {
   id: number
@@ -1275,6 +1285,16 @@ export default function BlockchainIQQuiz() {
     }
   }, [quizState.quizStarted, quizState.quizCompleted, quizState.timeRemaining])
 
+  // Farcaster SDK initialization
+  useEffect(() => {
+    if (isFarcasterMiniApp()) {
+      // Notify Farcaster that the mini app is ready
+      if (typeof window !== 'undefined' && window.parent) {
+        window.parent.postMessage({ type: 'sdk.actions.ready' }, '*')
+      }
+    }
+  }, [])
+
   // Format time display
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -1413,47 +1433,50 @@ export default function BlockchainIQQuiz() {
   // Welcome Screen
   if (!quizState.quizStarted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <Brain className="h-16 w-16 text-blue-600" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-gray-900">Base Blockchain IQ Assessment</CardTitle>
-            <CardDescription className="text-lg text-gray-600 max-w-lg mx-auto">
-              Test your knowledge of Base blockchain, Ethereum Virtual Machine (EVM), and general cryptocurrency
-              concepts in this professional IQ-style assessment.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="bg-blue-50 p-6 rounded-lg space-y-4">
-              <h3 className="font-semibold text-gray-900">Assessment Details:</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  10 randomly selected questions from our comprehensive database
-                </li>
-                <li className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  10-minute time limit with automatic submission
-                </li>
-                <li className="flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-purple-600" />
-                  IQ-style scoring system (50-150 point range)
-                </li>
-                <li className="flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-orange-600" />
-                  Detailed results with explanations available after completion
-                </li>
-              </ul>
-            </div>
-            <div className="text-center">
-              <Button onClick={startQuiz} size="lg" className="px-8 py-3 text-lg">
-                Start Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl mx-auto">
+          <Card className="shadow-xl border-0 rounded-2xl">
+            <CardHeader className="text-center space-y-6">
+              <div className="flex justify-center mb-2">
+                <img src="/BlockIQ.png" alt="BlockIQ Logo" className="h-24 w-24 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover" />
+              </div>
+              <CardTitle className="text-4xl font-extrabold text-blue-700 tracking-tight">BlockIQ</CardTitle>
+              <CardDescription className="text-lg text-gray-700 max-w-lg mx-auto">
+                <span className="block font-semibold text-blue-600 mb-2">Blockchain IQ Quiz</span>
+                Test your knowledge of blockchain, Base, EVM, and crypto concepts.<br />
+                Challenge yourself, pay to see your score, and share your results!
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div className="bg-blue-50/80 p-6 rounded-xl space-y-4 border border-blue-100">
+                <h3 className="font-semibold text-gray-900 text-lg">How it works:</h3>
+                <ul className="space-y-2 text-base text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    10 randomly selected questions from our comprehensive database
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    10-minute time limit with automatic submission
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-purple-600" />
+                    IQ-style scoring system (50-150 point range)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-orange-600" />
+                    Pay a small ETH fee to unlock your score and detailed results
+                  </li>
+                </ul>
+              </div>
+              <div className="text-center">
+                <Button onClick={startQuiz} size="lg" className="px-10 py-4 text-xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all">
+                  Start Quiz
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }

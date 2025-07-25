@@ -1,23 +1,22 @@
 {
-  "name": "IQ Quiz Contest",
+  "name": "BlockIQ Quiz",
   "description": "Test your blockchain IQ and pay to see your score! Challenge yourself with questions about Base, EVM, and general blockchain knowledge.",
-  "url": "https://your-app-url.com",
-  "icon": "https://your-app-url.com/placeholder-logo.png",
+  "url": "https://www.blockiq.xyz",
+  "icon": "https://www.blockiq.xyz/BlockIQ.png",
   "accountAssociation": {
     "type": "ethereum"
   },
   "frame": {
     "version": "1",
-    "name": "IQ Quiz Contest",
-    "iconUrl": "https://your-app-url.com/placeholder-logo.png",
-    "splashImageUrl": "https://your-app-url.com/placeholder-logo.png",
+    "name": "BlockIQ Quiz",
+    "iconUrl": "https://www.blockiq.xyz/BlockIQ.png",
+    "splashImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
     "splashBackgroundColor": "#1f2937",
-    "homeUrl": "https://your-app-url.com",
+    "homeUrl": "https://www.blockiq.xyz/",
     "subtitle": "Test your blockchain knowledge",
     "description": "Challenge yourself with questions about Base, EVM, and blockchain technology. Pay 0.0001 ETH to unlock your IQ score!",
     "screenshotUrls": [
-      "https://your-app-url.com/screenshot1.png",
-      "https://your-app-url.com/screenshot2.png"
+      "https://www.blockiq.xyz/BlockIQ.png"
     ],
     "primaryCategory": "education",
     "tags": [
@@ -28,11 +27,11 @@
       "ethereum",
       "learning"
     ],
-    "heroImageUrl": "https://your-app-url.com/hero.png",
+    "heroImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
     "tagline": "Challenge your blockchain knowledge",
-    "ogTitle": "IQ Quiz Contest - Blockchain Knowledge Test",
+    "ogTitle": "BlockIQ Quiz - Blockchain Knowledge Test",
     "ogDescription": "Test your understanding of Base, EVM, and blockchain technology. Pay to unlock your detailed IQ score and explanations.",
-    "ogImageUrl": "https://your-app-url.com/og-image.png"
+    "ogImageUrl": "https://www.blockiq.xyz/BlockIQ.png"
   },
   "miniApp": {
     "version": "1.0",
