@@ -66,22 +66,7 @@ export default function RootLayout({
         {/* Responsive meta tag for mobile support */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         
-        {/* Farcaster Mini App ready signal - fires as early as possible */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Send Farcaster ready signal immediately when head loads
-              try {
-                if (window.parent && window.parent !== window) {
-                  window.parent.postMessage({ type: 'sdk.actions.ready' }, '*');
-                  console.log('🔥 Early ready signal sent from layout');
-                }
-              } catch (e) {
-                console.warn('Early ready signal failed:', e);
-              }
-            `,
-          }}
-        />
+        // ...existing code...
         
         {/* Inject custom font variables for Geist fonts */}
         <style>{`
