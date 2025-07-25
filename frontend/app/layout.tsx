@@ -1,13 +1,6 @@
-"use client";
 // app/layout.tsx
 import type { Metadata } from "next";
-
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
-
-import { ClientWeb3Provider } from "@/components/ClientWeb3Provider";
-import FarcasterReady from "../components/FarcasterReady"
-
+import ClientRootLayout from "./ClientRootLayout";
 import "./globals.css";
 
 /* ------------------------------------------------------------------
@@ -56,12 +49,7 @@ export const metadata: Metadata = {
   },
 };
 
-/* ------------------------------------------------------------------
-   Root layout: embeds FarcasterReady so sdk.actions.ready() runs
--------------------------------------------------------------------*/
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -70,18 +58,14 @@ export default function RootLayout({
         {/* Inject Geist font CSS variables */}
         <style>{`
           html {
-            font-family: ${GeistSans.style.fontFamily};
-            --font-sans: ${GeistSans.variable};
-            --font-mono: ${GeistMono.variable};
+            font-family: var(--font-sans);
           }
         `}</style>
       </head>
       <body>
-        <ClientWeb3Provider>
-          {/* This component calls await sdk.actions.ready() once per page load */}
-          <FarcasterReady />
+        <ClientRootLayout>
           {children}
-        </ClientWeb3Provider>
+        </ClientRootLayout>
       </body>
     </html>
   );
