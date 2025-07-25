@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Clock, Brain, CheckCircle, XCircle, RotateCcw, Eye, Trophy } from "lucide-react"
 import PayToSeeScore from "@/components/PayToSeeScore"
 import ScoreDisplay from "@/components/ScoreDisplay"
-import { sdk } from '@farcaster/miniapp-sdk'
+import { sdk } from '@farcaster/frame-sdk'
 import { ClientWeb3Provider } from '@/components/ClientWeb3Provider'
 import { questionPool, Question } from "../components/Quiz/quiz-questions"
 
@@ -23,36 +23,48 @@ interface QuizState {
 }
 
 export default function HomePage() {
-  // Clean Farcaster SDK initialization
+  const [isAppReady, setIsAppReady] = useState(false)
+  
+  // Proper Farcaster SDK initialization
   useEffect(() => {
-    let readyCalled = false;
+    let isMounted = true;
     
-    const callReady = () => {
-      if (!readyCalled) {
-        try {
-          sdk.actions.ready();
-          readyCalled = true;
+    const initializeFarcasterSDK = async () => {
+      try {
+        // Wait for DOM to be fully loaded
+        if (document.readyState !== 'complete') {
+          await new Promise(resolve => {
+            if (document.readyState === 'complete') {
+              resolve(undefined);
+            } else {
+              window.addEventListener('load', resolve, { once: true });
+            }
+          });
+        }
+
+        // Additional delay to ensure everything is rendered
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (isMounted) {
+          // Call ready with proper error handling
+          await sdk.actions.ready();
           console.log('✅ Farcaster SDK ready called successfully');
-        } catch (error) {
-          console.warn('⚠️ Farcaster SDK ready failed:', error);
+          setIsAppReady(true);
+        }
+      } catch (error) {
+        console.warn('⚠️ Farcaster SDK ready failed:', error);
+        // Set app as ready even if SDK fails (for non-Farcaster environments)
+        if (isMounted) {
+          setIsAppReady(true);
         }
       }
     };
 
-    // Call ready immediately if document is already loaded
-    if (document.readyState === 'complete') {
-      callReady();
-    } else {
-      // Wait for window load if not ready
-      window.addEventListener('load', callReady);
-      // Fallback timeout
-      const fallbackTimer = setTimeout(callReady, 1000);
-      
-      return () => {
-        window.removeEventListener('load', callReady);
-        clearTimeout(fallbackTimer);
-      };
-    }
+    initializeFarcasterSDK();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const [quizState, setQuizState] = useState<QuizState>({
@@ -253,6 +265,29 @@ export default function HomePage() {
   const currentQuestion = quizState.selectedQuestions[quizState.currentQuestion]
   const selectedAnswer = quizState.selectedAnswers[quizState.currentQuestion]
   const progress = ((quizState.currentQuestion + 1) / 10) * 100
+
+  // Show loading screen until app is ready
+  if (!isAppReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center p-4">
+        <Card className="shadow-xl border-0 rounded-2xl max-w-md w-full">
+          <CardContent className="p-8 text-center space-y-6">
+            <div className="flex justify-center">
+              <img 
+                src="/BlockIQ.png" 
+                alt="BlockIQ Logo" 
+                className="h-16 w-16 rounded-full shadow-lg border-4 border-blue-200 bg-white object-cover animate-pulse" 
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-blue-700 mb-2">BlockIQ</h2>
+              <p className="text-gray-600">Loading your blockchain IQ quiz...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <ClientWeb3Provider>
