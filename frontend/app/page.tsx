@@ -1248,12 +1248,24 @@ interface QuizState {
 }
 
 export default function BlockchainIQQuiz() {
-  // Farcaster Mini App SDK: Notify Farcaster that the app is ready (removes splash screen)
+  const [isReady, setIsReady] = useState(false)
+
   useEffect(() => {
-    (async () => {
-      await sdk.actions.ready();
-    })();
-  }, []);
+    async function notifyReady() {
+      try {
+        await sdk.actions.ready()
+        console.log("✅ Farcaster ready() called")
+      } catch (e) {
+        console.error("Failed to call sdk.actions.ready()", e)
+      }
+      setIsReady(true)
+    }
+    if (!isReady) notifyReady()
+  }, [isReady])
+
+  if (!isReady) {
+    return <div>Loading interface…</div>
+  }
 
   const [quizState, setQuizState] = useState<QuizState>({
     currentQuestion: 0,
