@@ -26,8 +26,7 @@ import { ClientWeb3Provider } from "@/components/ClientWeb3Provider";
 import { questionPool, Question } from "../components/Quiz/quiz-questions";
 
 /* ------------------------------------------------------------------
-   NOTE — All sdk.actions.ready() logic has been removed from this file.
-   FarcasterReady inside layout.tsx now handles splash-screen dismissal.
+   Backup sdk.actions.ready() call in case FarcasterReady fails
 -------------------------------------------------------------------*/
 
 interface QuizState {
@@ -56,6 +55,33 @@ export default function HomePage() {
   const [showDetailedResults, setShowDetailedResults] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+
+  /* ------------------------- Backup Farcaster ready call ------------------------------ */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Backup call to ensure sdk.actions.ready() is called
+    const backupReadyCall = async () => {
+      try {
+        // Wait a bit longer than FarcasterReady to ensure it's a backup
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Dynamically import the SDK
+        const sdkModule = await import("@farcaster/miniapp-sdk");
+        const sdk = sdkModule.sdk;
+        
+        if (sdk && sdk.actions && typeof sdk.actions.ready === 'function') {
+          console.log("🔄 Backup: Calling sdk.actions.ready() from page component...");
+          await sdk.actions.ready();
+          console.log("✅ Backup: Farcaster splash screen dismissed from page component");
+        }
+      } catch (err) {
+        console.error("❌ Backup: sdk.actions.ready() failed from page component:", err);
+      }
+    };
+
+    backupReadyCall();
+  }, []);
 
   /* ------------------------- timer ------------------------------ */
   useEffect(() => {
