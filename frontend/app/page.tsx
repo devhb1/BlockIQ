@@ -64,19 +64,24 @@ export default function HomePage() {
     const backupReadyCall = async () => {
       try {
         // Wait a bit longer than FarcasterReady to ensure it's a backup
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Dynamically import the SDK
-        const sdkModule = await import("@farcaster/miniapp-sdk");
-        const sdk = sdkModule.sdk;
+        console.log("🔄 Backup: Calling Farcaster ready()...");
         
-        if (sdk && sdk.actions && typeof sdk.actions.ready === 'function') {
-          console.log("🔄 Backup: Calling sdk.actions.ready() from page component...");
+        // Try frame-sdk first
+        try {
+          const { sdk } = await import("@farcaster/frame-sdk");
           await sdk.actions.ready();
-          console.log("✅ Backup: Farcaster splash screen dismissed from page component");
+          console.log("✅ Backup: Farcaster ready() called successfully");
+        } catch (err) {
+          // Try miniapp-sdk as fallback
+          console.log("🔄 Backup: Trying with miniapp-sdk...");
+          const { sdk: miniappSdk } = await import("@farcaster/miniapp-sdk");
+          await miniappSdk.actions.ready();
+          console.log("✅ Backup: Farcaster ready() called successfully with miniapp-sdk");
         }
       } catch (err) {
-        console.error("❌ Backup: sdk.actions.ready() failed from page component:", err);
+        console.error("❌ Backup: Both SDKs failed:", err);
       }
     };
 
