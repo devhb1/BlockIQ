@@ -4,35 +4,36 @@
   "url": "https://www.blockiq.xyz",
   "icon": "https://www.blockiq.xyz/BlockIQ.png",
   "accountAssociation": {
-    "type": "ethereum"
+    "header": "eyJmaWQiOjMwODE4MCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDhBYWMwQjJBM0UwZjMwMDNkNzRkQkJCODNlNmUyRDQ1NzBBNWE3N2IifQ",
+    "payload": "eyJkb21haW4iOiJ3d3cuYmxvY2tpcS54eXoifQ",
+    "signature": "pjoisBKlOCQrl7sRALk/2fzsJeDeJZtSv6s4C433q3VHf2eMvpbu9eznXiK3Yv6kjQfgnHlCPCpct/5WaOzqdxw="
   },
   "frame": {
     "version": "1",
     "name": "BlockIQ Quiz",
     "iconUrl": "https://www.blockiq.xyz/BlockIQ.png",
     "splashImageUrl": "https://www.blockiq.xyz/splash.png",
-    "splashBackgroundColor": "#e0f2ff",
+    "splashBackgroundColor": "#F5F5F5 ",
     "homeUrl": "https://www.blockiq.xyz/",
-    "subtitle": "Test your blockchain IQ and pay to see your score",
-    "description": "Challenge yourself with questions about Base, EVM, and general blockchain knowledge.",
+    "subtitle": "Test your blockchain knowledge",
+    "description": "Challenge yourself with questions about Base, EVM, and blockchain technology. Pay 0.0001 ETH to unlock your IQ score!",
     "screenshotUrls": [
-      "https://www.blockiq.xyz/BLOCKIQHOME"
+      "https://www.blockiq.xyz/BlockIQ.png"
     ],
     "primaryCategory": "education",
     "tags": [
-      "blockchain",
       "quiz",
+      "blockchain",
       "education",
-      "crypto",
-      "web3"
+      "base",
+      "ethereum",
+      "learning"
     ],
-    "heroImageUrl": "https://www.blockiq.xyz/BlockIQ.png/",
-    "imageUrl": "https://www.blockiq.xyz/BLOCKIQHOME.png",
-    "tagline": "Grow, Raid & Rise in Stoke Fire",
-    "ogTitle": "BlockIQ – Blockchain IQ Quiz",
-    "ogDescription": "Test your blockchain IQ and pay to see your score. Challenge yourself with questions about Base, EVM, and crypto.",
-    "ogImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
-    "castShareUrl": "https://warpcast.com/~/compose?text=Check+out+BlockIQ+–+Test+your+blockchain+IQ+now!+https://www.blockiq.xyz"
+    "heroImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
+    "tagline": "Challenge your blockchain knowledge",
+    "ogTitle": "BlockIQ Quiz - Blockchain Knowledge Test",
+    "ogDescription": "Test your understanding of Base, EVM, and blockchain technology. Pay to unlock your detailed IQ score and explanations.",
+    "ogImageUrl": "https://www.blockiq.xyz/BlockIQ.png"
   },
   "miniApp": {
     "version": "1.0",
