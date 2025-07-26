@@ -26,9 +26,6 @@ interface PayToSeeScoreProps {
 }
 
 export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: PayToSeeScoreProps) {
-  // ---
-  // Hooks for wallet/account state and transaction status
-  // ---
   const { address, isConnected, chain } = useAccount() // Current wallet/account info
   const { disconnect } = useDisconnect() // Disconnect wallet
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined) // Transaction hash
@@ -50,6 +47,13 @@ export default function PayToSeeScore({ onPaymentSuccess, disabled = false }: Pa
   } = useWaitForTransactionReceipt({
     hash: txHash,
   })
+  // ---
+  // Debug logging for payment flow state
+  useEffect(() => {
+    console.log('[PayToSeeScore] txHash:', txHash)
+    console.log('[PayToSeeScore] isConfirmed:', isConfirmed)
+    console.log('[PayToSeeScore] paymentStatus:', paymentStatus)
+  }, [txHash, isConfirmed, paymentStatus])
 
   // ---
   // Effects to handle transaction lifecycle and errors
