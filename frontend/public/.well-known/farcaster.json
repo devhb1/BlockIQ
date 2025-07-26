@@ -12,8 +12,8 @@
     "version": "1",
     "name": "BlockIQ Quiz",
     "iconUrl": "https://www.blockiq.xyz/BlockIQ.png",
-    "splashImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
-    "splashBackgroundColor": "#1f2937",
+    "splashImageUrl": "https://www.blockiq.xyz/splash.png",
+    "splashBackgroundColor": "#F5F5F5",
     "homeUrl": "https://www.blockiq.xyz/",
     "subtitle": "Test your blockchain knowledge",
     "description": "Challenge yourself with questions about Base, EVM, and blockchain technology. Pay 0.0001 ETH to unlock your IQ score!",
@@ -24,15 +24,14 @@
     "tags": [
       "quiz",
       "blockchain",
-      "education",
       "base",
       "ethereum",
       "learning"
     ],
     "heroImageUrl": "https://www.blockiq.xyz/BlockIQ.png",
-    "tagline": "Challenge your blockchain knowledge",
-    "ogTitle": "BlockIQ Quiz - Blockchain Knowledge Test",
-    "ogDescription": "Test your understanding of Base, EVM, and blockchain technology. Pay to unlock your detailed IQ score and explanations.",
+    "tagline": "Test your blockchain IQ now!",
+    "ogTitle": "BlockIQ – Blockchain IQ Quiz",
+    "ogDescription": "Test your blockchain IQ. Pay to unlock your score and explanations.",
     "ogImageUrl": "https://www.blockiq.xyz/BlockIQ.png"
   },
   "miniApp": {

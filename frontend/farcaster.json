@@ -13,7 +13,7 @@
     "name": "BlockIQ Quiz",
     "iconUrl": "https://www.blockiq.xyz/BlockIQ.png",
     "splashImageUrl": "https://www.blockiq.xyz/splash.png",
-    "splashBackgroundColor": "#F5F5F5 ",
+    "splashBackgroundColor": "#F5F5F5",
     "homeUrl": "https://www.blockiq.xyz/",
     "subtitle": "Test your blockchain knowledge",
     "description": "Challenge yourself with questions about Base, EVM, and blockchain technology. Pay 0.0001 ETH to unlock your IQ score!",
