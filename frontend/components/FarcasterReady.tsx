@@ -1,30 +1,28 @@
 // components/FarcasterReady.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export default function FarcasterReady() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
-    if (typeof window === "undefined") return; // Only skip on server
-
-    console.log("🔄 FarcasterReady mounted, calling ready()...");
-
-    const callReady = async () => {
+    const load = async () => {
       try {
-        // Import the SDK
-        const { sdk } = await import("@farcaster/miniapp-sdk"); // Primary SDK
-        
-        // Call ready() immediately
+        console.log("🔄 FarcasterReady: Calling sdk.actions.ready()...");
         await sdk.actions.ready();
-        console.log("✅ Farcaster ready() called successfully");
+        console.log("✅ FarcasterReady: ready() called successfully");
+        setIsLoaded(true);
       } catch (err) {
-        console.error("❌ Farcaster ready() failed:", err);
+        console.error("❌ FarcasterReady: ready() failed:", err);
       }
     };
 
-    // Call ready immediately
-    callReady();
-  }, []);
+    if (sdk && !isLoaded) {
+      load();
+    }
+  }, [isLoaded]);
 
   return null;
 }

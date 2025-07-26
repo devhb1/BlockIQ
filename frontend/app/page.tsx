@@ -68,14 +68,10 @@ export default function HomePage() {
         
         console.log("🔄 Backup: Calling Farcaster ready()...");
         
-        // Use miniapp-sdk as primary
-        try {
-          const { sdk } = await import("@farcaster/miniapp-sdk");
-          await sdk.actions.ready();
-          console.log("✅ Backup: Farcaster ready() called successfully");
-        } catch (err) {
-          console.error("❌ Backup: Farcaster ready() failed:", err);
-        }
+        // Use direct import like FarcasterReady
+        const { sdk } = await import("@farcaster/miniapp-sdk");
+        await sdk.actions.ready();
+        console.log("✅ Backup: Farcaster ready() called successfully");
       } catch (err) {
         console.error("❌ Backup: Farcaster ready() failed:", err);
       }
