@@ -40,10 +40,19 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     isInitialized = true;
 
     if (typeof window !== 'undefined' && isFarcasterMiniApp()) {
-      // Use only the Farcaster farcasterMiniApp connector in Farcaster Mini App
+      // Hard guard: Only allow Farcaster connector in Mini App
+      const farcasterConnector = farcasterMiniApp();
+      if (!farcasterConnector) {
+        console.error('Farcaster Mini App: Farcaster connector not available!');
+        return null;
+      }
+      // Warn if any other connector is present (should never happen)
+      if (Array.isArray(farcasterConnector) && farcasterConnector.length > 1) {
+        console.warn('Farcaster Mini App: Multiple connectors detected! Only Farcaster should be present.');
+      }
       return createConfig({
         chains: [base, mainnet],
-        connectors: [farcasterMiniApp()],
+        connectors: [farcasterConnector],
         transports: {
           [base.id]: http(),
           [mainnet.id]: http(),
