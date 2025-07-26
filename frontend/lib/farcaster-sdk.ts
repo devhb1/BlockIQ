@@ -6,7 +6,7 @@ class FarcasterSDKManager {
     private static instance: FarcasterSDKManager;
     private readyCalled = false;
     private readyPromise: Promise<void> | null = null;
-    private isInitializing = false;
+    private isInitializing = false; // New flag
 
     private constructor() { }
 
@@ -52,17 +52,17 @@ class FarcasterSDKManager {
 
         try {
             await this.readyPromise;
-            this.readyCalled = true;
+            this.readyCalled = true; // Mark as called only on success
             console.log("✅ FarcasterSDK: ready() completed successfully");
         } catch (error) {
             // Reset on error so it can be retried
             this.readyCalled = false;
             this.readyPromise = null;
-            this.isInitializing = false;
+            this.isInitializing = false; // Reset on error
             console.error("❌ FarcasterSDK: ready() failed:", error);
             throw error;
         } finally {
-            this.isInitializing = false;
+            this.isInitializing = false; // Ensure reset
         }
     }
 
@@ -79,9 +79,8 @@ class FarcasterSDKManager {
                 });
             }
 
-            // Ensure we're in a Farcaster environment
-            const isInFarcaster = typeof window !== 'undefined' && 
-                (window.parent !== window || navigator.userAgent.includes('Farcaster'));
+            // Enhanced environment detection
+            const isInFarcaster = this.detectFarcasterEnvironment();
 
             if (!isInFarcaster) {
                 console.log("ℹ️ FarcasterSDK: Not in Farcaster environment, skipping ready()");
@@ -125,11 +124,56 @@ class FarcasterSDKManager {
         }
     }
 
+    private detectFarcasterEnvironment(): boolean {
+        if (typeof window === 'undefined') {
+            return false;
+        }
+
+        // Check if we're in an iframe (common for Mini Apps)
+        const isInIframe = window.parent !== window;
+        
+        // Check user agent for Farcaster indicators
+        const userAgent = navigator.userAgent.toLowerCase();
+        const hasFarcasterUA = userAgent.includes('farcaster') || 
+                              userAgent.includes('warpcast') ||
+                              userAgent.includes('nook');
+        
+        // Check for Farcaster-specific global objects
+        const hasFarcasterGlobals = !!(window as any).FarcasterSDK || 
+                                   !!(window as any).farcaster ||
+                                   !!(window as any).warpcast;
+        
+        // Check URL parameters that might indicate Farcaster context
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasFarcasterParams = urlParams.has('farcaster') || 
+                                  urlParams.has('warpcast') ||
+                                  urlParams.has('miniapp');
+        
+        // Check referrer for Farcaster domains
+        const referrer = document.referrer;
+        const hasFarcasterReferrer = referrer.includes('farcaster.xyz') || 
+                                    referrer.includes('warpcast.com') ||
+                                    referrer.includes('nook.xyz');
+
+        const isFarcaster = isInIframe || hasFarcasterUA || hasFarcasterGlobals || hasFarcasterParams || hasFarcasterReferrer;
+        
+        console.log("🔍 FarcasterSDK: Environment detection:", {
+            isInIframe,
+            hasFarcasterUA,
+            hasFarcasterGlobals,
+            hasFarcasterParams,
+            hasFarcasterReferrer,
+            isFarcaster
+        });
+
+        return isFarcaster;
+    }
+
     // Reset function for testing/development
     reset(): void {
         this.readyCalled = false;
         this.readyPromise = null;
-        this.isInitializing = false;
+        this.isInitializing = false; // Reset this flag too
         console.log("🔄 FarcasterSDK: Reset state for testing");
     }
 }

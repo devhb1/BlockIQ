@@ -5,7 +5,7 @@ import { base, mainnet } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { injected, coinbaseWallet, walletConnect } from 'wagmi/connectors'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import '@rainbow-me/rainbowkit/styles.css'
 
 // Create a custom connector for Farcaster in-app wallet
@@ -19,23 +19,35 @@ const farcasterWallet = () => {
   })
 }
 
-const config = getDefaultConfig({
-  appName: 'IQ Quiz Contest',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'default-project-id',
-  chains: [base, mainnet],
-  ssr: true, // If your dApp uses server side rendering (SSR)
-})
-
-const queryClient = new QueryClient()
+// Global flag to prevent multiple initializations
+let isInitialized = false
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
+
+  // Create config inside component to prevent multiple initializations
+  const config = useMemo(() => {
+    if (isInitialized) {
+      console.warn('Web3Provider: Config already initialized, reusing existing config');
+      return null;
+    }
+    
+    isInitialized = true;
+    return getDefaultConfig({
+      appName: 'IQ Quiz Contest',
+      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'default-project-id',
+      chains: [base, mainnet],
+      ssr: true, // If your dApp uses server side rendering (SSR)
+    })
+  }, [])
+
+  const queryClient = useMemo(() => new QueryClient(), [])
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
+  if (!mounted || !config) {
     return <>{children}</>
   }
 
