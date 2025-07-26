@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { useEffect, useState, useMemo } from 'react'
 import '@rainbow-me/rainbowkit/styles.css'
-import { farcasterFrame } from '@farcaster/frame-wagmi-connector'
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
 // Robust Farcaster Mini App environment detection
 function isFarcasterMiniApp() {
@@ -40,10 +40,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     isInitialized = true;
 
     if (typeof window !== 'undefined' && isFarcasterMiniApp()) {
-      // Use only the Farcaster farcasterFrame connector in Farcaster Mini App
+      // Use only the Farcaster farcasterMiniApp connector in Farcaster Mini App
       return createConfig({
         chains: [base, mainnet],
-        connectors: [farcasterFrame()],
+        connectors: [farcasterMiniApp()],
         transports: {
           [base.id]: http(),
           [mainnet.id]: http(),
