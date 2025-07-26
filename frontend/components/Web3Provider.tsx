@@ -1,17 +1,14 @@
 'use client'
 
-import { WagmiProvider, createConfig, http } from 'wagmi'
-import { base, mainnet } from 'wagmi/chains'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { useEffect, useState, useMemo } from 'react'
-import '@rainbow-me/rainbowkit/styles.css'
+import { base, mainnet } from 'wagmi/chains'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
+import { WagmiProvider, createConfig, http } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Robust Farcaster Mini App environment detection
 function isFarcasterMiniApp() {
   if (typeof window === 'undefined') return false;
-  // In iframe or user agent or global object
   const isIframe = window.parent !== window;
   const ua = navigator.userAgent || '';
   const hasFarcaster = (window as any).farcaster !== undefined;
@@ -25,66 +22,69 @@ function isFarcasterMiniApp() {
   );
 }
 
-// Global flag to prevent multiple initializations
 let isInitialized = false
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
+  const [config, setConfig] = useState<any>(null)
+  const [RainbowKitProvider, setRainbowKitProvider] = useState<any>(null)
 
-  // Memoize config to prevent multiple initializations
-  const config = useMemo(() => {
-    if (isInitialized) {
-      console.warn('Web3Provider: Config already initialized, reusing existing config');
-      return null;
-    }
-    isInitialized = true;
+  useEffect(() => {
+    setMounted(true)
+    if (isInitialized) return
+    isInitialized = true
 
     if (typeof window !== 'undefined' && isFarcasterMiniApp()) {
-      // Hard guard: Only allow Farcaster connector in Mini App
+      // Only Farcaster connector in Mini App context
       const farcasterConnector = farcasterMiniApp();
-      if (!farcasterConnector) {
-        console.error('Farcaster Mini App: Farcaster connector not available!');
-        return null;
-      }
-      // Warn if any other connector is present (should never happen)
-      if (Array.isArray(farcasterConnector) && farcasterConnector.length > 1) {
-        console.warn('Farcaster Mini App: Multiple connectors detected! Only Farcaster should be present.');
-      }
-      return createConfig({
+      setConfig(createConfig({
         chains: [base, mainnet],
         connectors: [farcasterConnector],
         transports: {
           [base.id]: http(),
           [mainnet.id]: http(),
         },
-      });
+      }))
+      setRainbowKitProvider(null)
     } else {
-      // Use default RainbowKit config for regular browsers
-      return getDefaultConfig({
-        appName: 'IQ Quiz Contest',
-        projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'default-project-id',
-        chains: [base, mainnet],
-        ssr: true,
-      });
+      // Dynamically import RainbowKit and getDefaultConfig for regular web
+      (async () => {
+        const { getDefaultConfig, RainbowKitProvider: RKP } = await import('@rainbow-me/rainbowkit')
+        const config = getDefaultConfig({
+          appName: 'IQ Quiz Contest',
+          projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'default-project-id',
+          chains: [base, mainnet],
+          ssr: true,
+        })
+        setConfig(config)
+        setRainbowKitProvider(() => RKP)
+      })()
     }
   }, [])
 
   const queryClient = useMemo(() => new QueryClient(), [])
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   if (!mounted || !config) {
     return <>{children}</>
   }
 
+  if (RainbowKitProvider) {
+    return (
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            {children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    )
+  }
+
+  // Mini App: No RainbowKitProvider
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          {children}
-        </RainbowKitProvider>
+        {children}
       </QueryClientProvider>
     </WagmiProvider>
   )
