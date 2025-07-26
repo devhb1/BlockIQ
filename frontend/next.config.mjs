@@ -13,6 +13,7 @@ const nextConfig = {
     return [
       {
         source: '/(.*)',
+        // Force cache invalidation with updated CSP
         headers: [
           {
             key: 'X-Frame-Options',
