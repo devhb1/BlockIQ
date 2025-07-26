@@ -56,28 +56,9 @@ export default function HomePage() {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
 
-  /* ------------------------- Backup Farcaster ready call ------------------------------ */
+  // Log when app is mounted to help debug
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // Backup call to ensure sdk.actions.ready() is called
-    const backupReadyCall = async () => {
-      try {
-        // Wait a bit longer than FarcasterReady to ensure it's a backup
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        console.log("🔄 Backup: Calling Farcaster ready()...");
-        
-        // Use direct import like FarcasterReady
-        const { sdk } = await import("@farcaster/miniapp-sdk");
-        await sdk.actions.ready();
-        console.log("✅ Backup: Farcaster ready() called successfully");
-      } catch (err) {
-        console.error("❌ Backup: Farcaster ready() failed:", err);
-      }
-    };
-
-    backupReadyCall();
+    console.log("🏠 HomePage: Component mounted and ready");
   }, []);
 
   /* ------------------------- timer ------------------------------ */

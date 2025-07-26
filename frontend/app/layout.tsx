@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import ClientRootLayout from "./ClientRootLayout";
+import FarcasterDebug from "../components/FarcasterDebug";
 import "./globals.css";
 
 /* ------------------------------------------------------------------
@@ -38,8 +39,23 @@ export const metadata: Metadata = {
     "fc:frame": "vNext",
     "fc:frame:image": "/BlockIQ.png",
     "fc:frame:button:1": "Start Quiz",
-    "fc:frame:button:1:action": "link",
+    "fc:frame:button:1:action": "link", 
     "fc:frame:button:1:target": "/",
+    // Mini App metadata
+    "fc:miniapp": JSON.stringify({
+      version: "1",
+      imageUrl: "https://www.blockiq.xyz/BlockIQ.png",
+      button: {
+        title: "Start Quiz",
+        action: {
+          type: "launch_frame",
+          url: "https://www.blockiq.xyz/",
+          name: "BlockIQ Quiz",
+          splashImageUrl: "https://www.blockiq.xyz/BlockIQ.png",
+          splashBackgroundColor: "#e0f2ff"
+        }
+      }
+    }),
     "farcaster:manifest": "/.well-known/farcaster.json",
     // Mobile viewport and PWA hints
     viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover",
@@ -66,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ClientRootLayout>
           {children}
         </ClientRootLayout>
+        <FarcasterDebug />
       </body>
     </html>
   );
