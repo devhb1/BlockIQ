@@ -68,20 +68,16 @@ export default function HomePage() {
         
         console.log("🔄 Backup: Calling Farcaster ready()...");
         
-        // Try frame-sdk first
+        // Use miniapp-sdk as primary
         try {
-          const { sdk } = await import("@farcaster/frame-sdk");
+          const { sdk } = await import("@farcaster/miniapp-sdk");
           await sdk.actions.ready();
           console.log("✅ Backup: Farcaster ready() called successfully");
         } catch (err) {
-          // Try miniapp-sdk as fallback
-          console.log("🔄 Backup: Trying with miniapp-sdk...");
-          const { sdk: miniappSdk } = await import("@farcaster/miniapp-sdk");
-          await miniappSdk.actions.ready();
-          console.log("✅ Backup: Farcaster ready() called successfully with miniapp-sdk");
+          console.error("❌ Backup: Farcaster ready() failed:", err);
         }
       } catch (err) {
-        console.error("❌ Backup: Both SDKs failed:", err);
+        console.error("❌ Backup: Farcaster ready() failed:", err);
       }
     };
 

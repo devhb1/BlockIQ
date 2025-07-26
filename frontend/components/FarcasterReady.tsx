@@ -12,23 +12,13 @@ export default function FarcasterReady() {
     const callReady = async () => {
       try {
         // Import the SDK
-        const { sdk } = await import("@farcaster/frame-sdk");
+        const { sdk } = await import("@farcaster/miniapp-sdk"); // Primary SDK
         
         // Call ready() immediately
         await sdk.actions.ready();
         console.log("✅ Farcaster ready() called successfully");
       } catch (err) {
         console.error("❌ Farcaster ready() failed:", err);
-        
-        // Try again with miniapp-sdk as fallback
-        try {
-          console.log("🔄 Trying with miniapp-sdk as fallback...");
-          const { sdk: miniappSdk } = await import("@farcaster/miniapp-sdk");
-          await miniappSdk.actions.ready();
-          console.log("✅ Farcaster ready() called successfully with miniapp-sdk");
-        } catch (fallbackErr) {
-          console.error("❌ Both SDKs failed:", fallbackErr);
-        }
       }
     };
 
