@@ -1,7 +1,9 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import ClientRootLayout from "./ClientRootLayout";
+import FarcasterReady from "../components/FarcasterReady";
 import FarcasterDebug from "../components/FarcasterDebug";
+import FarcasterSDKTest from "../components/FarcasterSDKTest";
 import "./globals.css";
 
 /* ------------------------------------------------------------------
@@ -80,9 +82,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <ClientRootLayout>
+          <FarcasterReady />
           {children}
         </ClientRootLayout>
         <FarcasterDebug />
+        <FarcasterSDKTest />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { farcasterSDK } from "@/lib/farcaster-sdk";
 
 export default function FarcasterDebug() {
   const [status, setStatus] = useState<string>("Initializing...");
@@ -15,14 +16,23 @@ export default function FarcasterDebug() {
         
         setStatus(`Environment: ${isInFarcaster ? 'Farcaster Mini App' : 'Regular Browser'}`);
         
+        // Ensure ready() has been called
+        try {
+          await farcasterSDK.ensureReady();
+          setStatus(prev => prev + ' | Ready: Called');
+        } catch (readyError) {
+          setStatus(prev => prev + ' | Ready: Failed');
+          console.warn('Ready call failed:', readyError);
+        }
+        
         // Try to get SDK context
         try {
           const { sdk } = await import('@farcaster/miniapp-sdk');
           const ctx = await sdk.context;
           setContext(ctx);
-          setStatus(prev => prev + ' | SDK Context: Available');
+          setStatus(prev => prev + ' | Context: Available');
         } catch (err) {
-          setStatus(prev => prev + ' | SDK Context: Failed');
+          setStatus(prev => prev + ' | Context: Failed');
           console.warn('SDK context check failed:', err);
         }
       } catch (error) {
@@ -45,6 +55,9 @@ export default function FarcasterDebug() {
           User: {context.user?.username || 'Not available'}
         </div>
       )}
+      <div className="mt-1 text-xs text-gray-300">
+        Build: {process.env.NODE_ENV}
+      </div>
     </div>
   );
 }
