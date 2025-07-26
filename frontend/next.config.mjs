@@ -12,7 +12,7 @@ const nextConfig = {
   async headers() {
     const timestamp = new Date().toISOString();
     const deploymentId = `deploy-${Date.now()}`;
-    
+
     return [
       {
         source: '/(.*)',
