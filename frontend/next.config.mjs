@@ -11,16 +11,17 @@ const nextConfig = {
   },
   async headers() {
     const timestamp = new Date().toISOString();
+    const deploymentId = `deploy-${Date.now()}`;
     
     return [
       {
         source: '/(.*)',
-        // Force cache invalidation with updated CSP - Deployment #3
+        // Force cache invalidation with updated CSP - Deployment #4
         headers: [
-          // Aggressive cache busting
+          // Ultra aggressive cache busting
           {
             key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0, private',
           },
           {
             key: 'Pragma',
@@ -28,29 +29,33 @@ const nextConfig = {
           },
           {
             key: 'Expires',
-            value: '0',
+            value: 'Thu, 01 Jan 1970 00:00:00 GMT',
           },
           {
             key: 'Surrogate-Control',
             value: 'no-store',
+          },
+          {
+            key: 'Clear-Site-Data',
+            value: '"cache", "cookies", "storage"',
           },
           // Frame embedding headers
           {
             key: 'X-Frame-Options',
             value: 'ALLOWALL',
           },
-          // Comprehensive CSP for Farcaster Mini Apps
+          // Comprehensive CSP for Farcaster Mini Apps - Version 4
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io https://explorer-api.walletconnect.com https://relay.walletconnect.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.rainbow.me",
-              "font-src 'self' https://fonts.gstatic.com https://*.rainbow.me",
-              "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io https://*.rpc.privy.systems https://relay.walletconnect.com https://*.infura.io https://*.alchemy.com https://*.quicknode.com https://*.cloudflare.com https://*.coinbase.com https://explorer-api.walletconnect.com https://cca-lite.coinbase.com https://api.walletconnect.com",
-              "frame-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io",
-              "frame-ancestors 'self' https://*.farcaster.xyz https://*.warpcast.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io https://explorer-api.walletconnect.com https://relay.walletconnect.com https://api.walletconnect.com https://*.coinbase.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.rainbow.me https://*.walletconnect.com",
+              "font-src 'self' https://fonts.gstatic.com https://*.rainbow.me https://*.walletconnect.com",
+              "img-src 'self' data: https: blob: https://*.walletconnect.com https://*.rainbow.me",
+              "connect-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io https://*.rpc.privy.systems https://relay.walletconnect.com https://*.infura.io https://*.alchemy.com https://*.quicknode.com https://*.cloudflare.com https://*.coinbase.com https://explorer-api.walletconnect.com https://cca-lite.coinbase.com https://api.walletconnect.com https://*.warpcast.com https://client.warpcast.com https://client.farcaster.xyz",
+              "frame-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://*.walletconnect.com https://*.rainbow.me https://*.privy.io https://*.coinbase.com",
+              "frame-ancestors 'self' https://*.farcaster.xyz https://*.warpcast.com https://farcaster.xyz https://warpcast.com https://client.farcaster.xyz https://client.warpcast.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
@@ -64,7 +69,11 @@ const nextConfig = {
           },
           {
             key: 'X-CSP-Version',
-            value: '3',
+            value: '4',
+          },
+          {
+            key: 'X-Deployment-ID',
+            value: deploymentId,
           }
         ],
       },

@@ -6,7 +6,9 @@ class FarcasterSDKManager {
     private static instance: FarcasterSDKManager;
     private readyCalled = false;
     private readyPromise: Promise<void> | null = null;
-    private isInitializing = false; // New flag
+    private isInitializing = false;
+    private retryCount = 0;
+    private maxRetries = 3;
 
     private constructor() { }
 
@@ -48,7 +50,7 @@ class FarcasterSDKManager {
         this.isInitializing = true;
 
         // Create the promise for this ready() call
-        this.readyPromise = this.callReady();
+        this.readyPromise = this.callReadyWithRetry();
 
         try {
             await this.readyPromise;
@@ -58,11 +60,33 @@ class FarcasterSDKManager {
             // Reset on error so it can be retried
             this.readyCalled = false;
             this.readyPromise = null;
-            this.isInitializing = false; // Reset on error
-            console.error("❌ FarcasterSDK: ready() failed:", error);
+            this.isInitializing = false;
+            console.error("❌ FarcasterSDK: ready() failed after all retries:", error);
             throw error;
         } finally {
-            this.isInitializing = false; // Ensure reset
+            this.isInitializing = false;
+        }
+    }
+
+    private async callReadyWithRetry(): Promise<void> {
+        while (this.retryCount < this.maxRetries) {
+            try {
+                await this.callReady();
+                this.retryCount = 0; // Reset on success
+                return;
+            } catch (error) {
+                this.retryCount++;
+                console.warn(`⚠️ FarcasterSDK: ready() attempt ${this.retryCount} failed:`, error);
+                
+                if (this.retryCount >= this.maxRetries) {
+                    throw error;
+                }
+                
+                // Wait before retry with exponential backoff
+                const delay = Math.min(1000 * Math.pow(2, this.retryCount - 1), 5000);
+                console.log(`⏳ FarcasterSDK: Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
     }
 
@@ -81,45 +105,80 @@ class FarcasterSDKManager {
 
             // Enhanced environment detection
             const isInFarcaster = this.detectFarcasterEnvironment();
+            const isInIframe = typeof window !== 'undefined' && window.parent !== window;
 
-            if (!isInFarcaster) {
+            // Always try to call ready() if we're in an iframe (common for Mini Apps)
+            if (!isInFarcaster && !isInIframe) {
                 console.log("ℹ️ FarcasterSDK: Not in Farcaster environment, skipping ready()");
                 return;
             }
 
             console.log("🔄 FarcasterSDK: Calling sdk.actions.ready()...");
 
-            // Try miniapp-sdk first (preferred for Mini Apps)
-            try {
-                const { sdk } = await import('@farcaster/miniapp-sdk');
-                await sdk.actions.ready();
-                console.log("✅ FarcasterSDK: miniapp-sdk ready() called successfully");
-                return;
-            } catch (miniappError) {
-                console.warn("⚠️ FarcasterSDK: miniapp-sdk failed, trying frame-sdk fallback:", miniappError);
+            // Try multiple SDK approaches in parallel for better reliability
+            const sdkAttempts = [
+                this.tryMiniappSDK(),
+                this.tryFrameSDK(),
+                this.tryGlobalSDK()
+            ];
+
+            // Wait for any of the attempts to succeed
+            const results = await Promise.allSettled(sdkAttempts);
+            
+            // Check if any succeeded
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].status === 'fulfilled') {
+                    console.log(`✅ FarcasterSDK: SDK attempt ${i + 1} succeeded`);
+                    return;
+                }
             }
 
-            // Fallback to frame-sdk
-            try {
-                const { sdk } = await import('@farcaster/frame-sdk');
-                await sdk.actions.ready();
-                console.log("✅ FarcasterSDK: frame-sdk ready() called successfully");
-                return;
-            } catch (frameError) {
-                console.warn("⚠️ FarcasterSDK: frame-sdk failed:", frameError);
-            }
-
-            // Last resort: global SDK
-            if (typeof window !== 'undefined' && (window as any).FarcasterSDK) {
-                await (window as any).FarcasterSDK.actions.ready();
-                console.log("✅ FarcasterSDK: Global SDK ready() called successfully");
-                return;
+            // If all failed, throw the first error
+            const firstError = results.find(r => r.status === 'rejected');
+            if (firstError) {
+                throw (firstError as PromiseRejectedResult).reason;
             }
 
             console.log("ℹ️ FarcasterSDK: No SDK available, running in non-Farcaster environment");
 
         } catch (error) {
             console.error("❌ FarcasterSDK: Critical error during ready() call:", error);
+            throw error;
+        }
+    }
+
+    private async tryMiniappSDK(): Promise<void> {
+        try {
+            const { sdk } = await import('@farcaster/miniapp-sdk');
+            await sdk.actions.ready();
+            console.log("✅ FarcasterSDK: miniapp-sdk ready() called successfully");
+        } catch (error) {
+            console.warn("⚠️ FarcasterSDK: miniapp-sdk failed:", error);
+            throw error;
+        }
+    }
+
+    private async tryFrameSDK(): Promise<void> {
+        try {
+            const { sdk } = await import('@farcaster/frame-sdk');
+            await sdk.actions.ready();
+            console.log("✅ FarcasterSDK: frame-sdk ready() called successfully");
+        } catch (error) {
+            console.warn("⚠️ FarcasterSDK: frame-sdk failed:", error);
+            throw error;
+        }
+    }
+
+    private async tryGlobalSDK(): Promise<void> {
+        try {
+            if (typeof window !== 'undefined' && (window as any).FarcasterSDK) {
+                await (window as any).FarcasterSDK.actions.ready();
+                console.log("✅ FarcasterSDK: Global SDK ready() called successfully");
+            } else {
+                throw new Error("Global SDK not available");
+            }
+        } catch (error) {
+            console.warn("⚠️ FarcasterSDK: Global SDK failed:", error);
             throw error;
         }
     }
@@ -155,6 +214,7 @@ class FarcasterSDKManager {
                                     referrer.includes('warpcast.com') ||
                                     referrer.includes('nook.xyz');
 
+        // More aggressive detection for iframe environments
         const isFarcaster = isInIframe || hasFarcasterUA || hasFarcasterGlobals || hasFarcasterParams || hasFarcasterReferrer;
         
         console.log("🔍 FarcasterSDK: Environment detection:", {
@@ -173,7 +233,8 @@ class FarcasterSDKManager {
     reset(): void {
         this.readyCalled = false;
         this.readyPromise = null;
-        this.isInitializing = false; // Reset this flag too
+        this.isInitializing = false;
+        this.retryCount = 0;
         console.log("🔄 FarcasterSDK: Reset state for testing");
     }
 }

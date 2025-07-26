@@ -1,7 +1,6 @@
 // components/FarcasterReady.tsx
 "use client";
 
-
 import { useEffect, useRef, useState } from "react";
 import { farcasterSDK } from "@/lib/farcaster-sdk";
 
@@ -24,20 +23,13 @@ export default function FarcasterReady() {
           }
         });
 
-        setStatus("Page loaded, calling ready()...");
+        setStatus("Page loaded, waiting for DOM...");
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        // Force ready() call for debugging
-        setStatus("Calling sdk.actions.ready() (forced)...");
-        try {
-          const { sdk } = await import('@farcaster/miniapp-sdk');
-          await sdk.actions.ready();
-          setStatus("✅ sdk.actions.ready() called successfully!");
-          console.log("✅ FarcasterReady: ready() called successfully (forced)");
-        } catch (err) {
-          setStatus("❌ Error calling sdk.actions.ready(): " + err);
-          console.error("❌ FarcasterReady: Error calling sdk.actions.ready() (forced)", err);
-        }
+        setStatus("Calling farcasterSDK.ensureReady()...");
+        await farcasterSDK.ensureReady();
+        setStatus("✅ FarcasterSDK ready() completed successfully!");
+        console.log("✅ FarcasterReady: farcasterSDK.ensureReady() completed successfully");
       } catch (error) {
         setStatus("❌ FarcasterReady: Failed to initialize: " + error);
         console.error("❌ FarcasterReady: Failed to initialize:", error);
