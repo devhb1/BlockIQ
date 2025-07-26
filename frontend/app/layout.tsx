@@ -67,6 +67,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Ensure responsive viewport */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* Favicon for browser and Farcaster */}
+        <link rel="icon" type="image/png" href="/BlockIQ.png" />
         {/* Inject Geist font CSS variables */}
         <style>{`
           html {
@@ -74,7 +76,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         `}</style>
       </head>
-      <body>
+      <body className="bg-background text-foreground">
+        {/* Global Header Bar */}
+        <header className="sticky top-0 z-30 w-full bg-white/80 backdrop-blur border-b border-blue-100 shadow-sm flex items-center px-4 sm:px-8 py-2 sm:py-3 gap-3">
+          <img
+            src="/BlockIQ.png"
+            alt="BlockIQ Logo"
+            className="h-8 w-8 sm:h-10 sm:w-10 rounded-full border-2 border-blue-200 bg-white shadow"
+            style={{ objectFit: 'cover' }}
+          />
+          <span className="text-xl sm:text-2xl font-extrabold text-blue-700 tracking-tight select-none">
+            BlockIQ
+          </span>
+        </header>
         <ClientRootLayout>
           <FarcasterReady />
           {children}
