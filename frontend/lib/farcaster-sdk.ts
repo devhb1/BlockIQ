@@ -6,6 +6,7 @@ class FarcasterSDKManager {
     private static instance: FarcasterSDKManager;
     private readyCalled = false;
     private readyPromise: Promise<void> | null = null;
+    private isInitializing = false;
 
     private constructor() { }
 
@@ -29,19 +30,39 @@ class FarcasterSDKManager {
             return this.readyPromise;
         }
 
-        // Mark as called immediately to prevent race conditions
-        this.readyCalled = true;
+        // Prevent multiple simultaneous calls
+        if (this.isInitializing) {
+            console.log("⏳ FarcasterSDK: Initialization in progress, waiting...");
+            return new Promise((resolve) => {
+                const checkReady = () => {
+                    if (this.readyCalled) {
+                        resolve();
+                    } else {
+                        setTimeout(checkReady, 50);
+                    }
+                };
+                checkReady();
+            });
+        }
+
+        this.isInitializing = true;
 
         // Create the promise for this ready() call
         this.readyPromise = this.callReady();
 
         try {
             await this.readyPromise;
+            this.readyCalled = true;
+            console.log("✅ FarcasterSDK: ready() completed successfully");
         } catch (error) {
             // Reset on error so it can be retried
             this.readyCalled = false;
             this.readyPromise = null;
+            this.isInitializing = false;
+            console.error("❌ FarcasterSDK: ready() failed:", error);
             throw error;
+        } finally {
+            this.isInitializing = false;
         }
     }
 
@@ -58,8 +79,14 @@ class FarcasterSDKManager {
                 });
             }
 
-            // Small delay to ensure everything is mounted
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Ensure we're in a Farcaster environment
+            const isInFarcaster = typeof window !== 'undefined' && 
+                (window.parent !== window || navigator.userAgent.includes('Farcaster'));
+
+            if (!isInFarcaster) {
+                console.log("ℹ️ FarcasterSDK: Not in Farcaster environment, skipping ready()");
+                return;
+            }
 
             console.log("🔄 FarcasterSDK: Calling sdk.actions.ready()...");
 
@@ -102,6 +129,7 @@ class FarcasterSDKManager {
     reset(): void {
         this.readyCalled = false;
         this.readyPromise = null;
+        this.isInitializing = false;
         console.log("🔄 FarcasterSDK: Reset state for testing");
     }
 }

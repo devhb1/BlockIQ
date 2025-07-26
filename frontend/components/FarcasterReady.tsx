@@ -14,7 +14,22 @@ export default function FarcasterReady() {
 
     const initializeApp = async () => {
       try {
+        // Wait for the app to be fully loaded and ready
+        // This ensures the splash screen doesn't hide until content is ready
+        await new Promise(resolve => {
+          if (document.readyState === 'complete') {
+            resolve(undefined);
+          } else {
+            window.addEventListener('load', resolve, { once: true });
+          }
+        });
+
+        // Additional small delay to ensure React components are fully rendered
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        console.log("🏠 FarcasterReady: App fully loaded, calling ready()");
         await farcasterSDK.ensureReady();
+        console.log("✅ FarcasterReady: ready() called successfully");
       } catch (error) {
         console.error("❌ FarcasterReady: Failed to initialize:", error);
       }
