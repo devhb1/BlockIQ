@@ -34,13 +34,6 @@ const nextConfig = {
               "form-action 'self'",
               "upgrade-insecure-requests"
             ].join('; '),
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: `
-              frame-ancestors 'self' https://*.farcaster.xyz https://*.warpcast.com;
-              connect-src 'self' https://farcaster.xyz https://client.farcaster.xyz https://warpcast.com https://client.warpcast.com https://wrpcd.net https://*.wrpcd.net https://privy.farcaster.xyz https://privy.warpcast.com https://auth.privy.io https://*.rpc.privy.systems https://cloudflareinsights.com https://explorer-api.walletconnect.com;
-            `.replace(/\s+/g, ' ')
           }
         ],
       },
